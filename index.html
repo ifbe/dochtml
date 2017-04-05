@@ -173,9 +173,9 @@ var draging=false;
 var newx = newy = -99;
 var movex = movey = -99;
 window.onload=function() {
-	var boxroot=document.getElementById("boxroot");
-	var boxhead=document.getElementById("boxhead");
-	var boxtail=document.getElementById("boxtail");
+	var broot=document.getElementById("broot");
+	var bhead=document.getElementById("bhead");
+	var btail=document.getElementById("btail");
 
 	var boxdraw=document.getElementById("boxdraw");
 	var boxpixel=document.getElementById("boxpixel");
@@ -227,10 +227,10 @@ window.onload=function() {
 		}
 	}
 
-	boxhead.onmousedown=function(event)
+	bhead.onmousedown=function(event)
 	{
-		newx=event.clientX-boxroot.offsetLeft;
-		newy=event.clientY-boxroot.offsetTop;
+		newx=event.clientX-broot.offsetLeft;
+		newy=event.clientY-broot.offsetTop;
 		draging=true;
 
 		document.onmousemove = function(event)
@@ -240,14 +240,14 @@ window.onload=function() {
 			var event = event || window.event;
 			var boxX = event.clientX - newx;
 			var boxY = event.clientY - newy;
-			var maxX = document.body.scrollWidth - boxroot.offsetWidth;
-			var maxY = document.body.offsetHeight - boxroot.offsetHeight;
+			var maxX = document.body.scrollWidth - broot.offsetWidth;
+			var maxY = document.body.offsetHeight - broot.offsetHeight;
 			//boxX = (boxX < 0) ? 0 : boxX;
 			boxY = (boxY < 0) ? 0 : boxY;
 			//boxX = (boxX > maxX) ? maxX : boxX;
 			//boxY = (boxY > maxY) ? maxY : boxY;
-			boxroot.style.left = boxX + "px";
-			boxroot.style.top = boxY + "px";
+			broot.style.left = boxX + "px";
+			broot.style.top = boxY + "px";
 		};
          
 		document.onmouseup = function()
@@ -256,11 +256,11 @@ window.onload=function() {
 			document.body.style.cursor = "";
 		};
 	}
-	boxhead.ontouchstart=function(event)
+	bhead.ontouchstart=function(event)
 	{
 		var touch0 = event.touches[0];
-		newx=touch0.clientX-boxroot.offsetLeft;
-		newy=touch0.clientY-boxroot.offsetTop;
+		newx=touch0.clientX-broot.offsetLeft;
+		newy=touch0.clientY-broot.offsetTop;
 		draging=true;
 
 		document.ontouchmove = function(event)
@@ -271,14 +271,14 @@ window.onload=function() {
 			var touch0 = event.touches[0];
 			var boxX = touch0.clientX - newx;
 			var boxY = touch0.clientY - newy;
-			var maxX = document.body.scrollWidth - boxroot.offsetWidth;
-			var maxY = document.body.offsetHeight - boxroot.offsetHeight;
+			var maxX = document.body.scrollWidth - broot.offsetWidth;
+			var maxY = document.body.offsetHeight - broot.offsetHeight;
 			//boxX = (boxX < 0) ? 0 : boxX;
 			boxY = (boxY < 0) ? 0 : boxY;
 			//boxX = (boxX > maxX) ? maxX : boxX;
 			//boxY = (boxY > maxY) ? maxY : boxY;
-			boxroot.style.left = boxX + "px";
-			boxroot.style.top = boxY + "px";
+			broot.style.left = boxX + "px";
+			broot.style.top = boxY + "px";
 		};
          
 		document.ontouchend = function()
@@ -288,23 +288,18 @@ window.onload=function() {
 		};
 	}
 
-	boxbutton3.onmousedown=boxbutton3.ontouchstart=function(event)
-	{
-		create();
-	}
-
 	boxpixel.onmouseenter=boxdraw.onmouseenter=function(event)
 	{
-		//document.getElementById("boxroot").style.opacity=0.8;
+		//document.getElementById("broot").style.opacity=0.8;
 	}
 	boxpixel.onmouseleave=boxdraw.onmouseleave=function(event)
 	{
-		//document.getElementById("boxroot").style.opacity=0.4;
+		//document.getElementById("broot").style.opacity=0.4;
 	}
 	boxpixel.onmousedown=boxdraw.onmousedown=function(event)
 	{
-		var x = event.clientX -boxroot.offsetLeft;
-		var y = event.clientY -boxroot.offsetTop -boxdraw.offsetTop;
+		var x = event.clientX -broot.offsetLeft;
+		var y = event.clientY -broot.offsetTop -boxdraw.offsetTop;
 
 		newx=movex=x;
 		newy=movex=y;
@@ -312,8 +307,8 @@ window.onload=function() {
 	}
 	boxpixel.onmousemove=boxdraw.onmousemove=function(event)
 	{
-		var x = event.clientX -boxroot.offsetLeft;
-		var y = event.clientY -boxroot.offsetTop -boxdraw.offsetTop;
+		var x = event.clientX -broot.offsetLeft;
+		var y = event.clientY -broot.offsetTop -boxdraw.offsetTop;
 		if((x==movex)&&(y==movey))return;
 
 		movex=x;
@@ -322,16 +317,16 @@ window.onload=function() {
 	}
 	boxpixel.onmouseup=boxdraw.onmouseup=function(event)
 	{
-		var x = event.clientX -boxroot.offsetLeft;
-		var y = event.clientY -boxroot.offsetTop -boxdraw.offsetTop;
+		var x = event.clientX -broot.offsetLeft;
+		var y = event.clientY -broot.offsetTop -boxdraw.offsetTop;
 		say("mouseend "+x+" "+y);
 	}
 
 	boxdraw.ontouchstart=function(event)
 	{
 		var touch0 = event.touches[0];
-		var x = Math.round(touch0.clientX -boxroot.offsetLeft);
-		var y = Math.round(touch0.clientY -boxroot.offsetTop -boxdraw.offsetTop);
+		var x = Math.round(touch0.clientX -broot.offsetLeft);
+		var y = Math.round(touch0.clientY -broot.offsetTop -boxdraw.offsetTop);
 
 		newx=movex=x;
 		newy=movex=y;
@@ -341,8 +336,8 @@ window.onload=function() {
 	boxdraw.ontouchmove=function(event)
 	{
 		var touch0 = event.touches[0];
-		var x = Math.round(touch0.clientX -boxroot.offsetLeft);
-		var y = Math.round(touch0.clientY -boxroot.offsetTop -boxdraw.offsetTop);
+		var x = Math.round(touch0.clientX -broot.offsetLeft);
+		var y = Math.round(touch0.clientY -broot.offsetTop -boxdraw.offsetTop);
 
 		movex=x;
 		movey=y;
@@ -394,7 +389,7 @@ html,body{margin:0;padding:0;overflow:hidden;}
 	overflow-y:scroll;
 }
 
-#boxroot {
+.boxroot {
 	position:absolute;
 	left:4%;
 	top:4%;
@@ -403,7 +398,7 @@ html,body{margin:0;padding:0;overflow:hidden;}
 	box-shadow:2px 2px 4px #eee;
 	opacity:0.8;
 }
-#boxhead {
+.boxhead {
 	position:absolute;
 	top:0%;
 	width:94%;
@@ -413,32 +408,6 @@ html,body{margin:0;padding:0;overflow:hidden;}
 	border-radius: 4px 4px 0 0;
 	text-align:center;
 }
-#boxbutton1{
-	position:absolute;
-	top:0%;
-	left:94%;
-	width:2%;
-	height:2%;
-	background:#0000ff;
-}
-#boxbutton2{
-	position:absolute;
-	top:0%;
-	left:96%;
-	width:2%;
-	height:2%;
-	background:#00ff00;
-}
-#boxbutton3{
-	position:absolute;
-	top:0%;
-	left:98%;
-	width:2%;
-	height:2%;
-	background:#ff0000;
-}
-
-
 .boxbody {
 	position:absolute;
 	top:2%;
@@ -448,16 +417,7 @@ html,body{margin:0;padding:0;overflow:hidden;}
 	color:#fff;
 	text-align:center;
 }
-#pixel {
-	position:absolute;
-	left:0%;
-	top:0%;
-	width:100%;
-	height:100%;
-}
-
-
-#boxtail {
+.boxtail {
 	position:absolute;
 	top:98%;
 	width:100%;
@@ -466,6 +426,39 @@ html,body{margin:0;padding:0;overflow:hidden;}
 	border-bottom: 1px solid #eee;
 	border-radius: 4px 4px 0 0;
 	text-align:center;
+}
+
+.boxbutton1{
+	position:absolute;
+	top:0%;
+	left:94%;
+	width:2%;
+	height:2%;
+	background:#0000ff;
+}
+.boxbutton2{
+	position:absolute;
+	top:0%;
+	left:96%;
+	width:2%;
+	height:2%;
+	background:#00ff00;
+}
+.boxbutton3{
+	position:absolute;
+	top:0%;
+	left:98%;
+	width:2%;
+	height:2%;
+	background:#ff0000;
+}
+
+#pixel {
+	position:absolute;
+	left:0%;
+	top:0%;
+	width:100%;
+	height:100%;
 }
 #str {
 	position:absolute;
@@ -485,21 +478,23 @@ html,body{margin:0;padding:0;overflow:hidden;}
 </pre>
 
 
-<div id="boxroot">
-	<div id="boxhead">42</div>
-	<div id="boxbutton1"></div>
-	<div id="boxbutton2"></div>
-	<div id="boxbutton3"></div>
+<div class="boxroot" id="broot">
+	<div class="boxhead" id="bhead">42</div>
 
 
-	<div id="boxdraw" class="boxbody">
+	<div class="boxbutton1"></div>
+	<div class="boxbutton2"></div>
+	<div class="boxbutton3" onmousedown="create()" ontouchstart="create"></div>
+
+
+	<div class="boxbody" id="boxdraw">
 		haha
 	</div>
-	<div id="boxpixel" class="boxbody">
+	<div class="boxbody" id="boxpixel">
 		<canvas id="pixel" width="512" height="512">
 		</canvas>
 	</div>
-	<div id="boxlogin" class="boxbody" style="font-size:64px;">
+	<div class="boxbody" id="boxlogin" style="font-size:64px;">
 		<br />
 		server:<input type="text" id="server" value="127.0.0.1" /><br />
 		port:<input type="text" id="port" value="2222" /><br />
@@ -510,7 +505,7 @@ html,body{margin:0;padding:0;overflow:hidden;}
 	</div>
 
 
-	<div id="boxtail">
+	<div class="boxtail" id="btail">
 		<input id="str" type="text">
 		</input>
 	</div>
