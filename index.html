@@ -9,379 +9,7 @@ function say(data)
 	var debug=document.getElementById("debug");
 	debug.textContent=debug.textContent+data+"\n";
 	debug.scrollTop=debug.scrollHeight;
-}
-function updateserver()
-{
-	var server=document.getElementById("server");
-	server.value=window.location.hostname;
-}
-function updatesize()
-{
-	var src=document.getElementById("boxpixel");
-	var dst=document.getElementById("pixel");
-	var dx=src.offsetWidth;
-	var dy=src.offsetHeight;
-	say(dx+" "+dy);
-
-	if(dx<dy)
-	{
-		dst.style.width=dst.style.height=dx+"px";
-		dst.style.top=((dy-dx)/2)+"px";
-	}
-	else
-	{
-		dst.style.width=dst.style.height=dy+"px";
-		dst.style.left=((dx-dy)/2)+"px";
-	}
-}
-
-var stage=0;
-var ws;
-function send(data)
-{
-	//say(data);
-	if(stage>0)ws.send(data);
-}
-function sendbin(data)
-{
-	//var bin = new Uint8Array(1024*1024*3);
-	//for (var i = 0; i < 1024*1024; i+=3) {
-		//do something
-	//}
-	//ws.send(bin.buffer);
-}
-function sendblob(data)
-{
-	//var file = document.querySelector('input[type="file"]').files[0];
-	//ws.send(file);
-}
-
-function draw(data)
-{
-	say("[server] string "+data.length);
-	document.getElementById('boxlogin').style.display="none";
-	document.getElementById('boxdraw').style.display="";
-	document.getElementById('boxpixel').style.display="none";
-
-	document.getElementById('boxdraw').innerHTML=data;
-}
-function pixel(data)
-{
-	say("[server] binary "+data.byteLength);
-	document.getElementById('boxlogin').style.display="none";
-	document.getElementById('boxdraw').style.display="none";
-	document.getElementById('boxpixel').style.display="";
-
-	var ctx = document.getElementById('pixel').getContext('2d');
-	var imageData = ctx.getImageData(0, 0, 512, 512);
-	var buf8 = new Uint8ClampedArray(data);
-
-	imageData.data.set(buf8);
-	ctx.putImageData(imageData, 0, 0);
-}
-function create()
-{
-	document.getElementById('boxlogin').style.display="";
-	document.getElementById('boxdraw').style.display="none";
-	document.getElementById('boxpixel').style.display="none";
-	if(stage>0)
-	{
-		ws.close();
-		stage=0;
-	}
-}
-function threedim()
-{
-	var scene = new THREE.Scene();
-	var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-
-	var renderer = new THREE.WebGLRenderer();
-	renderer.setSize( window.innerWidth, window.innerHeight );
-	document.body.appendChild( renderer.domElement );
-
-	var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-	var cube = new THREE.Mesh( geometry, material );
-	scene.add( cube );
-	camera.position.z = 5;
-
-	var render = function ()
-	{
-		requestAnimationFrame( render );
-
-		cube.rotation.x += 0.1;
-		cube.rotation.y += 0.1;
-		renderer.render(scene, camera);
-	};
-
-	render();
-}
-function start()
-{
-	var server=document.getElementById("server").value;
-	var port=document.getElementById("port").value;
-	var username=document.getElementById("username").value;
-	var password=document.getElementById("password").value;
-
-	var url="ws://"+server+":"+port;
-	ws=new WebSocket(url);
-	ws.binaryType = 'arraybuffer';
-
-	ws.onmessage=function(event)
-	{
-		if(typeof event.data === "string")
-		{
-			if(stage==0x10)
-			{
-				//recv server_identity
-				say("[stage0][server]"+event.data);
-
-				//send username
-				send(username);
-				say("[stage1][client]username="+username);
-
-				stage=0x11;
-			}
-			else if(stage==0x11)
-			{
-				//recv fixed_salt temp_salt
-				say("[stage1][server]challenge="+event.data);
-
-				//send md5(temp_salt + md5(fixed_salt + password))
-				var arr=event.data.split(",");
-				var hash1=CryptoJS.SHA1(arr[0] + password);
-				say("	"+hash1);
-				var hash2=CryptoJS.SHA1(arr[1] + hash1);
-				say("	"+hash2);
-
-				send(hash2);
-				say("[stage2][client]response="+hash2);
-
-				stage=0x12;
-			}
-			else if(stage==0x12)
-			{
-				send("haha");
-				say("[stage2][server]status="+event.data);
-				stage=31;
-			}
-			else if(stage==31)
-			{
-				draw(event.data);
-			}
-		}
-		else //if(event.data instanceof ArrayBuffer)
-		{
-			pixel(event.data);
-		}
-	};
-	ws.onopen=function(event)
-	{
-		stage=16;
-		say("onopen:"+url);
-
-		var str="final answer?";
-		send(str);
-		say("[stage0][client]" + str);
-	};
-	ws.onclose=function(event)
-	{
-		create();
-		say("connection closed:"+event.code);
-	};
-	ws.onerror=function(event)
-	{
-		create();
-		say("something wrong");
-	};
-}
-
-var draging=false;
-var newx = newy = -99;
-var movex = movey = -99;
-window.onload=function() {
-	var broot=document.getElementById("broot");
-	var bhead=document.getElementById("bhead");
-	var btail=document.getElementById("btail");
-
-	var boxdraw=document.getElementById("boxdraw");
-	var boxpixel=document.getElementById("boxpixel");
-	var boxlogin=document.getElementById("boxlogin");
-
-	updateserver();
-	updatesize();
-	document.onkeydown=function(ev)
-	{
-		var k=ev.keyCode;
-		if(k==8||k==9)
-		{
-			send("char "+k);
-			if(boxlogin.style.display=="none")
-			{
-				event.preventDefault();
-			}
-		}
-		else if(k==13||k==32)
-		{
-			send("char "+k);
-		}
-		else if(k>=48&&k<=57)
-		{
-			send("char "+k);
-		}
-		else if(k>=65&&k<=90)
-		{
-			k=k+32;
-			send("char "+k);
-		}
-		else if(k>=96&&k<=105)
-		{
-			k=k-48;
-			send("char "+k);
-		}
-		else if(k>=106&&k<=111)
-		{
-			k-=64;
-			send("char "+k);
-		}
-		else if(k==187)
-		{
-			send("char 61");
-		}
-		else
-		{
-			send("kbd "+k);
-		}
-	}
-
-	bhead.onmousedown=function(event)
-	{
-		newx=event.clientX-broot.offsetLeft;
-		newy=event.clientY-broot.offsetTop;
-		draging=true;
-
-		document.onmousemove = function(event)
-		{
-			if(!draging)return;
-			document.body.style.cursor = "move";
-			var event = event || window.event;
-			var boxX = event.clientX - newx;
-			var boxY = event.clientY - newy;
-			var maxX = document.body.scrollWidth - broot.offsetWidth;
-			var maxY = document.body.offsetHeight - broot.offsetHeight;
-			//boxX = (boxX < 0) ? 0 : boxX;
-			boxY = (boxY < 0) ? 0 : boxY;
-			//boxX = (boxX > maxX) ? maxX : boxX;
-			//boxY = (boxY > maxY) ? maxY : boxY;
-			broot.style.left = boxX + "px";
-			broot.style.top = boxY + "px";
-		};
-         
-		document.onmouseup = function()
-		{
-			draging = false;
-			document.body.style.cursor = "";
-		};
-	}
-	bhead.ontouchstart=function(event)
-	{
-		var touch0 = event.touches[0];
-		newx=touch0.clientX-broot.offsetLeft;
-		newy=touch0.clientY-broot.offsetTop;
-		draging=true;
-
-		document.ontouchmove = function(event)
-		{
-			if(!draging)return;
-
-			document.body.style.cursor = "move";
-			var touch0 = event.touches[0];
-			var boxX = touch0.clientX - newx;
-			var boxY = touch0.clientY - newy;
-			var maxX = document.body.scrollWidth - broot.offsetWidth;
-			var maxY = document.body.offsetHeight - broot.offsetHeight;
-			//boxX = (boxX < 0) ? 0 : boxX;
-			boxY = (boxY < 0) ? 0 : boxY;
-			//boxX = (boxX > maxX) ? maxX : boxX;
-			//boxY = (boxY > maxY) ? maxY : boxY;
-			broot.style.left = boxX + "px";
-			broot.style.top = boxY + "px";
-		};
-         
-		document.ontouchend = function()
-		{
-			draging = false;
-			document.body.style.cursor = "";
-		};
-	}
-
-	boxpixel.onmouseenter=boxdraw.onmouseenter=function(event)
-	{
-		//document.getElementById("broot").style.opacity=0.8;
-	}
-	boxpixel.onmouseleave=boxdraw.onmouseleave=function(event)
-	{
-		//document.getElementById("broot").style.opacity=0.4;
-	}
-	boxpixel.onmousedown=boxdraw.onmousedown=function(event)
-	{
-		var x = event.clientX -broot.offsetLeft;
-		var y = event.clientY -broot.offsetTop -boxdraw.offsetTop;
-
-		newx=movex=x;
-		newy=movex=y;
-		say("mousestart "+x+" "+y);
-	}
-	boxpixel.onmousemove=boxdraw.onmousemove=function(event)
-	{
-		var x = event.clientX -broot.offsetLeft;
-		var y = event.clientY -broot.offsetTop -boxdraw.offsetTop;
-		if((x==movex)&&(y==movey))return;
-
-		movex=x;
-		movey=y;
-		//say("mousemove "+x+" "+y);
-	}
-	boxpixel.onmouseup=boxdraw.onmouseup=function(event)
-	{
-		var x = event.clientX -broot.offsetLeft;
-		var y = event.clientY -broot.offsetTop -boxdraw.offsetTop;
-		say("mouseend "+x+" "+y);
-	}
-
-	boxdraw.ontouchstart=function(event)
-	{
-		var touch0 = event.touches[0];
-		var x = Math.round(touch0.clientX -broot.offsetLeft);
-		var y = Math.round(touch0.clientY -broot.offsetTop -boxdraw.offsetTop);
-
-		newx=movex=x;
-		newy=movex=y;
-		event.preventDefault();
-		say("touchatart "+x+" "+y);
-	}
-	boxdraw.ontouchmove=function(event)
-	{
-		var touch0 = event.touches[0];
-		var x = Math.round(touch0.clientX -broot.offsetLeft);
-		var y = Math.round(touch0.clientY -broot.offsetTop -boxdraw.offsetTop);
-
-		movex=x;
-		movey=y;
-		event.preventDefault();
-		//say("touchmove "+x+" "+y);
-	}
-	boxdraw.ontouchcancel=boxdraw.ontouchend=function(event)
-	{
-		var x = movex-newx;
-		var y = movey-newy;
-
-		if(x<-128)send("kbd 37");
-		else if(x>128)send("kbd 39");
-		else if(y<-128)send("kbd 38");
-		else if(y>128)send("kbd 40");
-		say("touchend "+x+" "+y);
-	}
+	console.log(data);
 }
 window.onresize=function(){
 	var w = window.innerWidth
@@ -392,13 +20,123 @@ window.onresize=function(){
 	|| document.documentElement.clientHeight
 	|| document.body.clientHeight;
 
-	updatesize();
+	//updatesize(w,h);
+}
+window.onload=function() {
+	var f0=document.getElementById("f0");
+	var f1=document.getElementById("f1");
+	var f2=document.getElementById("f2");
+	var f3=document.getElementById("f3");
+	f0.style.display="";
+	f1.style.display="none";
+	f2.style.display="none";
+	f3.style.display="none";
+	document.onkeydown=function(ev)
+	{
+		var k=ev.keyCode;
+		say("char "+k);
+
+		if(k==8)			//back
+		{
+			event.preventDefault();
+		}
+		else if(k==9)		//tab
+		{
+			event.preventDefault();
+		}
+		else if(k==13)		//enter
+		{
+		}
+		else if(k==27)		//esc
+		{
+		}
+		else if(k==32)		//space
+		{
+		}
+		else if(k>=37&&k<=40)	//l,u,r,d
+		{
+			event.preventDefault();
+		}
+		else if(k>=48&&k<=57)	//[0,9](mainarea)
+		{
+		}
+		else if(k>=65&&k<=90)	//[a,z]
+		{
+			k=k+32;
+		}
+		else if(k>=96&&k<=105)	//[0,9](keypad)
+		{
+			k=k-48;
+		}
+		else if(k>=106&&k<=111)	//*+
+		{
+			k-=64;
+		}
+		else if(k>=112&&k<=115)	//f1,f2,f3,f4
+		{
+			event.preventDefault();
+
+			if(k==112)
+			{
+				f0.style.display="none";
+				f1.style.display="";
+				f2.style.display="none";
+				f3.style.display="none";
+			}
+			else if(k==113)
+			{
+				f0.style.display="none";
+				f1.style.display="none";
+				f2.style.display="";
+				f3.style.display="none";
+			}
+			else if(k==114)
+			{
+				f0.style.display="none";
+				f1.style.display="none";
+				f2.style.display="none";
+				f3.style.display="";
+			}
+			else
+			{
+				f0.style.display="";
+				f1.style.display="none";
+				f2.style.display="none";
+				f3.style.display="none";
+			}
+		}
+		else if(k==187)
+		{
+		}
+		else
+		{
+		}
+	}
 }
 </script>
 
 <style>
-html,body{margin:0;padding:0;overflow:hidden;}
-#haha {
+html,body{
+	margin:0;
+	padding:0;
+	overflow:hidden;
+}
+
+#f0 {
+	position:absolute;
+	width:100%;
+	height:100%;
+	opacity:0.8;
+	background:#444;
+	box-shadow:2px 2px 4px #eee;
+}
+#menu {
+	color:#fff;
+	font-size:64px;
+	text-align:center;
+}
+
+#f1 {
 	white-space:pre-wrap;
 	white-space:-moz-pre-wrap;
 	white-space:-pre-wrap;
@@ -411,133 +149,108 @@ html,body{margin:0;padding:0;overflow:hidden;}
 	top:0%;
 	width:100%;
 	height:100%;
-	background:#000;
 	color:#fff;
+	background:#444;
 	overflow-y:scroll;
 }
 
-.boxroot {
+#f2 {
 	position:absolute;
-	left:4%;
-	top:4%;
-	width:90%;
-	height:90%;
-	box-shadow:2px 2px 4px #eee;
+	width:100%;
+	height:100%;
 	opacity:0.8;
-}
-.boxhead {
-	position:absolute;
-	top:0%;
-	width:94%;
-	height:2%;
-	background: #ccc;
-	border-bottom: 1px solid #eee;
-	border-radius: 4px 4px 0 0;
-	text-align:center;
-}
-.boxbody {
-	position:absolute;
-	top:2%;
-	width:100%;
-	height:96%;
-	background:#444;
 	color:#fff;
-	text-align:center;
+	background:#444;
+	box-shadow:2px 2px 4px #eee;
 }
-.boxtail {
-	position:absolute;
-	top:98%;
-	width:100%;
-	height:2%;
-	background: #ccc;
-	border-bottom: 1px solid #eee;
-	border-radius: 4px 4px 0 0;
-	text-align:center;
-}
-
-.boxbutton1{
-	position:absolute;
-	top:0%;
-	left:94%;
-	width:2%;
-	height:2%;
-	background:#0000ff;
-}
-.boxbutton2{
-	position:absolute;
-	top:0%;
-	left:96%;
-	width:2%;
-	height:2%;
-	background:#00ff00;
-}
-.boxbutton3{
-	position:absolute;
-	top:0%;
-	left:98%;
-	width:2%;
-	height:2%;
-	background:#ff0000;
-}
-
 #pixel {
+	text-align:center;
+}
+
+#f3 {
 	position:absolute;
-	left:0%;
-	top:0%;
 	width:100%;
 	height:100%;
+	opacity:0.8;
+	color:#fff;
+	background:#444;
+	box-shadow:2px 2px 4px #eee;
 }
-#str {
-	position:absolute;
-	left:25%;
-	top:0%;
-	width:50%;
-	height:100%;
+#scene {
+	text-align:center;
 }
 </style>
 </head>
+
+
+
+
 <body>
 
-
-<pre id="haha">
-	<code id="debug">
-	</code>
-</pre>
-
-
-<div class="boxroot" id="broot">
-	<div class="boxhead" id="bhead">42</div>
-
-
-	<div class="boxbutton1"></div>
-	<div class="boxbutton2"></div>
-	<div class="boxbutton3" onmousedown="create()" ontouchstart="create"></div>
-
-
-	<div class="boxbody" id="boxdraw">
-		haha
-	</div>
-	<div class="boxbody" id="boxpixel">
-		<canvas id="pixel" width="512" height="512">
-		</canvas>
-	</div>
-	<div class="boxbody" id="boxlogin" style="font-size:64px;">
+<!-- this is login menu -->
+<div id="f0">
+	<div id="menu">
 		<br />
 		server:<input type="text" id="server" value="127.0.0.1" /><br />
 		port:<input type="text" id="port" value="2222" /><br />
 		username:<input type="text" id="username" value="42" /><br />
 		password:<input type="password" id="password" value="42" /><br />
-		<input type="submit" value="play" onclick="start()" />
-		<input type="submit" value="look" onclick="start()"/>
-	</div>
-
-
-	<div class="boxtail" id="btail">
-		<input id="str" type="text">
-		</input>
 	</div>
 </div>
 
+<!-- (dimension=1)(text console) -->
+<pre id="f1">
+	<code id="debug">
+	</code>
+</pre>
+
+<!-- (dimension=2)(canvas pixel) -->
+<div id="f2">
+	<canvas id="pixel" width="512" height="512">
+	</canvas>
+	<script type="text/javascript">
+		var canvas=document.getElementById('pixel');
+		var ctx=canvas.getContext('2d');
+		ctx.fillStyle='#FF0000';
+		ctx.fillRect(100,200,300,400);
+	</script>
+</div>
+
+<!-- (dimension=3)(webgl three.js) -->
+<div id="f3">
+	<h1 id="scene">haha</h1>
+	<!--
+	<script type="text/javascript">
+		function threedim()
+		{
+		var scene = new THREE.Scene();
+		var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+		var renderer = new THREE.WebGLRenderer();
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		document.body.appendChild( renderer.domElement );
+
+		var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+		var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+		var cube = new THREE.Mesh( geometry, material );
+		scene.add( cube );
+		camera.position.z = 5;
+
+		var render = function ()
+		{
+			requestAnimationFrame( render );
+
+			cube.rotation.x += 0.1;
+			cube.rotation.y += 0.1;
+			renderer.render(scene, camera);
+		};
+
+		render();
+		}
+	</script>
+	-->
+</div>
 
 </body>
+
 </html>
