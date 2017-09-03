@@ -311,10 +311,24 @@ function mousemove(ev)
 	oldx = newx;
 	oldy = newy;
 }
+function touchmove(ev)
+{
+	if(flag == 0)return;
+
+	var t = ev.touches[0];
+	newx = t.clientX;
+	newy = t.clientY;
+	if(newx < oldx)surroundrotate(0.1);
+	if(newx > oldx)surroundrotate(-0.1);
+	if(newy < oldy)cameraz -= 0.1;
+	if(newy > oldy)cameraz += 0.1;
+	oldx = newx;
+	oldy = newy;
+}
 </script>
 </head>
 
-<body onload="birth()" onresize="resize()" onkeydown="keydown(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchdown="mousedown(event)" ontouchup="mouseup(event)" ontouchmove="mousemove(event)">
+<body onload="birth()" onresize="resize()" onkeydown="keydown(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
     <canvas id="canvas" style="border:none;"></canvas>
 </body>
 
