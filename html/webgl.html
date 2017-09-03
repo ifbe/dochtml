@@ -78,26 +78,35 @@ function getShader(gl, id) {
 
 var shaderProgram;
 function initshaders() {
-        var vertexShader = getShader(gl, "vshader");
-        var fragmentShader = getShader(gl, "fshader");
+	var vertexShader = getShader(gl, "vshader");
+	var fragmentShader = getShader(gl, "fshader");
 
-        shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vertexShader);
-        gl.attachShader(shaderProgram, fragmentShader);
-        gl.linkProgram(shaderProgram);
+	shaderProgram = gl.createProgram();
+	gl.attachShader(shaderProgram, vertexShader);
+	gl.attachShader(shaderProgram, fragmentShader);
+	gl.linkProgram(shaderProgram);
 
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-            alert("Could not initialise shaders");
-        }
+	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+		alert("Could not initialise shaders");
+	}
 
-        gl.useProgram(shaderProgram);
-        gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "position"));
+	gl.useProgram(shaderProgram);
+	gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "position"));
 }
 
+var axisbuffer;
 var vertexbuffer;
 var indexbuffer;
 function initbuffers() {
-        var vertices = [
+	var axisdata = [
+		-1000.0, 0.0, 0.0,
+		1000.0, 0.0, 0.0,
+		0.0, -1000.0, 0.0,
+		0.0, 1000.0, 0.0,
+		0.0, 0.0, -1000.0,
+		0.0, 0.0, 1000.0
+	];
+	var vertexdata = [
 		-0.25, -0.25, -0.5,
 		0.25, -0.5, -0.5,
 		0.5, 0.25, -0.5,
@@ -122,12 +131,14 @@ function initbuffers() {
 		2, 3, 6
 	];
 
+	axisbuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, axisbuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisdata), gl.STATIC_DRAW);
+
 	//
-        vertexbuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        vertexbuffer.itemSize = 3;
-        vertexbuffer.numItems = 8;
+	vertexbuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexdata), gl.STATIC_DRAW);
 
 	//
 	indexbuffer = gl.createBuffer();
@@ -162,7 +173,11 @@ projmatrix = new Float32Array([
 	0.0, 0.0, -1.0, -1.0,
 	0.0, 0.0, -0.2, 0.0
 ]);
-function setMatrixUniforms()
+function setmodelmatrix()
+{
+	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), false, modelmatrix);
+}
+function setviewmatrix()
 {
 	var norm;
 
@@ -209,35 +224,41 @@ function setMatrixUniforms()
 	viewmatrix[14] = camerax*nx + cameray*ny + cameraz*nz;
 	viewmatrix[15] = 1.0;
 
-	projmatrix[5] = windowwidth / windowheight;
-	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), false, modelmatrix);
 	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "view"), false, viewmatrix);
+}
+function setprojmatrix()
+{
+	projmatrix[5] = windowwidth / windowheight;
 	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "proj"), false, projmatrix);
 }
-
 function drawScene()
 {
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT);
+	gl.viewport(0, 0, windowwidth, windowheight);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexbuffer.itemSize, gl.FLOAT, false, 0, 0);
+	setmodelmatrix();
+	setviewmatrix();
+	setprojmatrix();
 
-        gl.viewport(0, 0, windowwidth, windowheight);
-	setMatrixUniforms();
+	gl.bindBuffer(gl.ARRAY_BUFFER, axisbuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+	gl.drawArrays(gl.LINES, 0, 6);
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
 	gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
-        //gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
 function birth()
 {
 	resize();
-        initwebgl();
-        initshaders();
-        initbuffers();
+	initwebgl();
+	initshaders();
+	initbuffers();
 
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.enable(gl.DEPTH_TEST);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.enable(gl.DEPTH_TEST);
 
 	var tick = function()
 	{
@@ -246,17 +267,54 @@ function birth()
 	}
 	tick();
 }
-function keydown()
+
+function surroundrotate(angle)
 {
 	var tx = camerax;
 	var ty = cameray;
-	camerax = Math.cos(0.1)*tx + Math.sin(0.1)*ty;
-	cameray = -Math.sin(0.1)*tx + Math.cos(0.1)*ty;
+
+	camerax = Math.cos(angle)*tx - Math.sin(angle)*ty;
+	cameray = Math.sin(angle)*tx + Math.cos(angle)*ty;
+}
+
+var flag=0;
+var oldx;
+var oldy;
+function keydown(ev)
+{
+	var k = ev.keyCode;
+	if(k == 37)surroundrotate(0.1);
+	if(k == 39)surroundrotate(-0.1);
+	if(k == 38)cameraz += 0.1;
+	if(k == 40)cameraz -= 0.1;
+}
+function mousedown(ev)
+{
+	flag = 1;
+	oldx = ev.clientX;
+	oldy = ev.clientY;
+}
+function mouseup(ev)
+{
+	flag = 0;
+}
+function mousemove(ev)
+{
+	if(flag == 0)return;
+
+	newx = ev.clientX;
+	newy = ev.clientY;
+	if(newx < oldx)surroundrotate(0.1);
+	if(newx > oldx)surroundrotate(-0.1);
+	if(newy < oldy)cameraz -= 0.1;
+	if(newy > oldy)cameraz += 0.1;
+	oldx = newx;
+	oldy = newy;
 }
 </script>
 </head>
 
-<body onload="birth()" onresize="resize()" onkeydown="keydown()" onmousemove="keydown()" ontouchmove="keydown()">
+<body onload="birth()" onresize="resize()" onkeydown="keydown(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchdown="mousedown(event)" ontouchup="mouseup(event)" ontouchmove="mousemove(event)">
     <canvas id="canvas" style="border:none;"></canvas>
 </body>
 
