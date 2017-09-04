@@ -33,7 +33,96 @@ function resize()
 	document.getElementById("canvas").height = windowheight;
 }
 
+var axishandle;
+var stlhandle;
+var vertexhandle;
+var indexhandle;
+var axisdata = [
+	-1000.0, 0.0, 0.0,
+	1000.0, 0.0, 0.0,
+	0.0, -1000.0, 0.0,
+	0.0, 1000.0, 0.0,
+	0.0, 0.0, -1000.0,
+	0.0, 0.0, 1000.0
+];
+var vertexdata = [
+	-0.25, -0.25, -0.5,
+	0.25, -0.5, -0.5,
+	0.5, 0.25, -0.5,
+	-0.5, 0.5, -0.5,
+	-0.5, -0.5, 0.5,
+	0.5, -0.5, 0.5,
+	0.5, 0.5, 0.5,
+	-0.5, 0.5, 0.5
+];
+var indexdata = [
+	0, 1, 2,
+	0, 2, 3,
+	0, 1, 5,
+	0, 4, 5,
+	5, 6, 2,
+	1, 2, 5,
+	5, 6, 7,
+	4, 5, 7,
+	3, 7, 4,
+	0, 3, 4,
+	3, 7, 6,
+	2, 3, 6
+];
+
+var arraybuffer;
+var stlpointcount=0;
+function allowDrop(event)
+{
+	event.preventDefault();
+}
+function dropfile(event)
+{
+	event.preventDefault();
+
+	var file = event.dataTransfer.files[0];
+	console.log(file);
+
+	var reader = new FileReader();
+	reader.onload = function(ev) {
+		//
+		arraybuffer = reader.result;
+		if(arraybuffer.byteLength < 1000)
+		{
+			stlpointcount = 0;
+			return;
+		}
+
+		//
+		var dataview = new DataView(arraybuffer);
+		stlpointcount = dataview.getUint32(80, true);
+		console.log(stlpointcount);
+
+		//
+		var tempdata = new Float32Array(stlpointcount * 9);
+		for(var j=0;j<stlpointcount;j++)
+		{
+			tempdata[j*9 + 0] = dataview.getFloat32(j*50 + 96, true);
+			tempdata[j*9 + 1] = dataview.getFloat32(j*50 + 100, true);
+			tempdata[j*9 + 2] = dataview.getFloat32(j*50 + 104, true);
+			tempdata[j*9 + 3] = dataview.getFloat32(j*50 + 108, true);
+			tempdata[j*9 + 4] = dataview.getFloat32(j*50 +112, true);
+			tempdata[j*9 + 5] = dataview.getFloat32(j*50 +116, true);
+			tempdata[j*9 + 6] = dataview.getFloat32(j*50 +120, true);
+			tempdata[j*9 + 7] = dataview.getFloat32(j*50 +124, true);
+			tempdata[j*9 + 8] = dataview.getFloat32(j*50 +128, true);
+		}
+
+		//
+		stlhandle = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, stlhandle);
+		gl.bufferData(gl.ARRAY_BUFFER, tempdata, gl.STATIC_DRAW);
+	}
+	reader.readAsArrayBuffer(file);
+}
+
 var gl;
+var shaderProgram;
 function initwebgl(canvas) {
         var canvas = document.getElementById("canvas");
 	try {
@@ -75,8 +164,6 @@ function getShader(gl, id) {
 
 	return shader;
 }
-
-var shaderProgram;
 function initshaders() {
 	var vertexShader = getShader(gl, "vshader");
 	var fragmentShader = getShader(gl, "fshader");
@@ -94,61 +181,9 @@ function initshaders() {
 	gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "position"));
 }
 
-var axisbuffer;
-var vertexbuffer;
-var indexbuffer;
-function initbuffers() {
-	var axisdata = [
-		-1000.0, 0.0, 0.0,
-		1000.0, 0.0, 0.0,
-		0.0, -1000.0, 0.0,
-		0.0, 1000.0, 0.0,
-		0.0, 0.0, -1000.0,
-		0.0, 0.0, 1000.0
-	];
-	var vertexdata = [
-		-0.25, -0.25, -0.5,
-		0.25, -0.5, -0.5,
-		0.5, 0.25, -0.5,
-		-0.5, 0.5, -0.5,
-		-0.5, -0.5, 0.5,
-		0.5, -0.5, 0.5,
-		0.5, 0.5, 0.5,
-		-0.5, 0.5, 0.5
-        ];
-	var indexdata = [
-		0, 1, 2,
-		0, 2, 3,
-		0, 1, 5,
-		0, 4, 5,
-		5, 6, 2,
-		1, 2, 5,
-		5, 6, 7,
-		4, 5, 7,
-		3, 7, 4,
-		0, 3, 4,
-		3, 7, 6,
-		2, 3, 6
-	];
-
-	axisbuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, axisbuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisdata), gl.STATIC_DRAW);
-
-	//
-	vertexbuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexdata), gl.STATIC_DRAW);
-
-	//
-	indexbuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexbuffer);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(indexdata), gl.STATIC_DRAW);
-}
-
-var camerax = 0.0;
+var camerax = 3.0;
 var cameray = 2.0;
-var cameraz = 0.0;
+var cameraz = 1.0;
 var centerx = 0.0;
 var centery = 0.0;
 var centerz = 0.0;
@@ -233,21 +268,40 @@ function setprojmatrix()
 }
 function drawScene()
 {
+	//setup
+	gl.enable(gl.DEPTH_TEST);
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.viewport(0, 0, windowwidth, windowheight);
 
+	//matrix
 	setmodelmatrix();
 	setviewmatrix();
 	setprojmatrix();
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, axisbuffer);
+	//draw axis
+	gl.bindBuffer(gl.ARRAY_BUFFER, axishandle);
 	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 	gl.drawArrays(gl.LINES, 0, 6);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-	gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+	//draw shape
+	if(stlpointcount == 0)
+	{
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexhandle);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+		gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
+	}
+
+	//draw stl
+	else
+	{
+		gl.bindBuffer(gl.ARRAY_BUFFER, stlhandle);
+		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+		gl.drawArrays(gl.TRIANGLES, 0, stlpointcount*3);
+	}
 }
 
 function birth()
@@ -255,10 +309,20 @@ function birth()
 	resize();
 	initwebgl();
 	initshaders();
-	initbuffers();
 
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	gl.enable(gl.DEPTH_TEST);
+	axishandle = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, axishandle);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisdata), gl.STATIC_DRAW);
+
+	//
+	vertexhandle = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexhandle);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexdata), gl.STATIC_DRAW);
+
+	//
+	indexhandle = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexhandle);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(indexdata), gl.STATIC_DRAW);
 
 	var tick = function()
 	{
@@ -287,6 +351,24 @@ function keydown(ev)
 	if(k == 39)surroundrotate(-0.1);
 	if(k == 38)cameraz += 0.1;
 	if(k == 40)cameraz -= 0.1;
+}
+function mousewheel(ev)
+{
+	var tx=camerax;
+	var ty=cameray;
+	var tz=cameraz;
+	if(ev.deltaY < 0)
+	{
+		camerax = 0.9*tx + 0.1*centerx;
+		cameray = 0.9*ty + 0.1*centery;
+		cameraz = 0.9*tz + 0.1*centerz;
+	}
+	else
+	{
+		camerax = 1.1*tx - 0.1*centerx;
+		cameray = 1.1*ty - 0.1*centery;
+		cameraz = 1.1*tz - 0.1*centerz;
+	}
 }
 function mousedown(ev)
 {
@@ -325,29 +407,10 @@ function touchmove(ev)
 	oldx = newx;
 	oldy = newy;
 }
-function allowDrop(event)
-{
-	event.preventDefault();
-}
-function dropfile(event)
-{
-	event.preventDefault();
-
-	var file = event.dataTransfer.files[0];
-	console.log(file);
-
-	var reader = new FileReader();
-	reader.onload = function(ev) {
-		var array = reader.result;
-		var data = new Uint8Array(array);
-		console.log(data)
-	}
-	reader.readAsArrayBuffer(file);
-}
 </script>
 </head>
 
-<body onload="birth()" onresize="resize()" ondragover="allowDrop(event)" ondrop="dropfile(event)" onkeydown="keydown(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
+<body onload="birth()" onresize="resize()" ondragover="allowDrop(event)" ondrop="dropfile(event)" onkeydown="keydown(event)" onmousewheel="mousewheel(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
     <canvas id="canvas" ></canvas>
 </body>
 
