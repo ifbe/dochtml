@@ -325,11 +325,30 @@ function touchmove(ev)
 	oldx = newx;
 	oldy = newy;
 }
+function allowDrop(event)
+{
+	event.preventDefault();
+}
+function dropfile(event)
+{
+	event.preventDefault();
+
+	var file = event.dataTransfer.files[0];
+	console.log(file);
+
+	var reader = new FileReader();
+	reader.onload = function(ev) {
+		var array = reader.result;
+		var data = new Uint8Array(array);
+		console.log(data)
+	}
+	reader.readAsArrayBuffer(file);
+}
 </script>
 </head>
 
-<body onload="birth()" onresize="resize()" onkeydown="keydown(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
-    <canvas id="canvas" style="border:none;"></canvas>
+<body onload="birth()" onresize="resize()" ondragover="allowDrop(event)" ondrop="dropfile(event)" onkeydown="keydown(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
+    <canvas id="canvas" ></canvas>
 </body>
 
 </html>
