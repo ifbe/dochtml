@@ -16,7 +16,7 @@ uniform mat4 proj;
 void main(void) {
 	vec3 N = normalize(normal);
 	vec3 S = normalize(vec3(diffuseplace - position));
-	vec3 ddd = diffusecolor * max(dot(S, N), 0.01);
+	vec3 ddd = diffusecolor * max(dot(S, N), 0.00);
 	vColor = ambientcolor + ddd;
 	gl_Position = proj * view * model * vec4(position, 1.0);
 }
@@ -296,8 +296,8 @@ function setmatrix()
 function setlight()
 {
 	var ambientcolor = new Float32Array([0.2, 0.2, 0.2]);
-	var diffusecolor = new Float32Array([0.8, 0.0, 0.0]);
-	var diffuseplace = new Float32Array([0.5, 0.5, 5.0]);
+	var diffusecolor = new Float32Array([0.8, 0.8, 0.8]);
+	var diffuseplace = new Float32Array([0.0, 0.0, 10.0]);
 	gl.uniform3fv(gl.getUniformLocation(shaderProgram, "ambientcolor"), ambientcolor);
 	gl.uniform3fv(gl.getUniformLocation(shaderProgram, "diffusecolor"), diffusecolor);
 	gl.uniform3fv(gl.getUniformLocation(shaderProgram, "diffuseplace"), diffuseplace);
