@@ -4,21 +4,28 @@
 <meta charset="UTF-8" />
 <style>html,body{margin:0;padding:0;overflow:hidden;}</style>
 <script id="vshader" type="x-shader/x-vertex">
+attribute vec3 normal;
 attribute vec3 position;
-varying vec4 vColor;
+varying vec3 vColor;
+uniform vec3 ambientcolor;
+uniform vec3 diffusecolor;
+uniform vec3 diffuseplace;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 void main(void) {
-	vColor = vec4(position, 1.0);
+	vec3 N = normalize(normal);
+	vec3 S = normalize(vec3(diffuseplace - position));
+	vec3 ddd = diffusecolor * max(dot(S, N), 0.01);
+	vColor = ambientcolor + ddd;
 	gl_Position = proj * view * model * vec4(position, 1.0);
 }
 </script>
 <script id="fshader" type="x-shader/x-fragment">
 precision mediump float;
-varying vec4 vColor;
+varying vec3 vColor;
 void main(void) {
-	gl_FragColor = vColor;
+	gl_FragColor = vec4(vColor, 1.0);
 }
 </script>
 
@@ -34,7 +41,6 @@ function resize()
 }
 
 var axishandle;
-var stlhandle;
 var vertexhandle;
 var indexhandle;
 var axisdata = [
@@ -70,6 +76,7 @@ var indexdata = [
 	2, 3, 6
 ];
 
+var stlhandle;
 var arraybuffer;
 var stlpointcount=0;
 function allowDrop(event)
@@ -99,18 +106,29 @@ function dropfile(event)
 		console.log(stlpointcount);
 
 		//
-		var tempdata = new Float32Array(stlpointcount * 9);
+		var tempdata = new Float32Array(stlpointcount * 18);
 		for(var j=0;j<stlpointcount;j++)
 		{
-			tempdata[j*9 + 0] = dataview.getFloat32(j*50 + 96, true);
-			tempdata[j*9 + 1] = dataview.getFloat32(j*50 + 100, true);
-			tempdata[j*9 + 2] = dataview.getFloat32(j*50 + 104, true);
-			tempdata[j*9 + 3] = dataview.getFloat32(j*50 + 108, true);
-			tempdata[j*9 + 4] = dataview.getFloat32(j*50 +112, true);
-			tempdata[j*9 + 5] = dataview.getFloat32(j*50 +116, true);
-			tempdata[j*9 + 6] = dataview.getFloat32(j*50 +120, true);
-			tempdata[j*9 + 7] = dataview.getFloat32(j*50 +124, true);
-			tempdata[j*9 + 8] = dataview.getFloat32(j*50 +128, true);
+			tempdata[j*18 + 0] = dataview.getFloat32(j*50 + 84, true);
+			tempdata[j*18 + 1] = dataview.getFloat32(j*50 + 88, true);
+			tempdata[j*18 + 2] = dataview.getFloat32(j*50 + 92, true);
+			tempdata[j*18 + 3] = dataview.getFloat32(j*50 + 96, true);
+			tempdata[j*18 + 4] = dataview.getFloat32(j*50 + 100, true);
+			tempdata[j*18 + 5] = dataview.getFloat32(j*50 + 104, true);
+
+			tempdata[j*18 + 6] = dataview.getFloat32(j*50 + 84, true);
+			tempdata[j*18 + 7] = dataview.getFloat32(j*50 + 88, true);
+			tempdata[j*18 + 8] = dataview.getFloat32(j*50 + 92, true);
+			tempdata[j*18 + 9] = dataview.getFloat32(j*50 + 108, true);
+			tempdata[j*18 + 10] = dataview.getFloat32(j*50 + 112, true);
+			tempdata[j*18 + 11] = dataview.getFloat32(j*50 + 116, true);
+
+			tempdata[j*18 + 12] = dataview.getFloat32(j*50 + 84, true);
+			tempdata[j*18 + 13] = dataview.getFloat32(j*50 + 88, true);
+			tempdata[j*18 + 14] = dataview.getFloat32(j*50 + 92, true);
+			tempdata[j*18 + 15] = dataview.getFloat32(j*50 + 120, true);
+			tempdata[j*18 + 16] = dataview.getFloat32(j*50 + 124, true);
+			tempdata[j*18 + 17] = dataview.getFloat32(j*50 + 128, true);
 		}
 
 		//
@@ -123,6 +141,8 @@ function dropfile(event)
 
 var gl;
 var shaderProgram;
+var positionobject;
+var normalobject;
 function initwebgl(canvas) {
         var canvas = document.getElementById("canvas");
 	try {
@@ -176,9 +196,10 @@ function initshaders() {
 	if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
 		alert("Could not initialise shaders");
 	}
-
 	gl.useProgram(shaderProgram);
-	gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "position"));
+
+	positionobject = gl.getAttribLocation(shaderProgram, "position");
+	normalobject = gl.getAttribLocation(shaderProgram, "normal");
 }
 
 var camerax = 3.0;
@@ -210,7 +231,6 @@ projmatrix = new Float32Array([
 ]);
 function setmodelmatrix()
 {
-	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), false, modelmatrix);
 }
 function setviewmatrix()
 {
@@ -259,12 +279,28 @@ function setviewmatrix()
 	viewmatrix[14] = camerax*nx + cameray*ny + cameraz*nz;
 	viewmatrix[15] = 1.0;
 
-	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "view"), false, viewmatrix);
 }
 function setprojmatrix()
 {
 	projmatrix[5] = windowwidth / windowheight;
+}
+function setmatrix()
+{
+	setmodelmatrix();
+	setviewmatrix();
+	setprojmatrix();
+	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), false, modelmatrix);
+	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "view"), false, viewmatrix);
 	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "proj"), false, projmatrix);
+}
+function setlight()
+{
+	var ambientcolor = new Float32Array([0.2, 0.2, 0.2]);
+	var diffusecolor = new Float32Array([0.8, 0.0, 0.0]);
+	var diffuseplace = new Float32Array([0.5, 0.5, 5.0]);
+	gl.uniform3fv(gl.getUniformLocation(shaderProgram, "ambientcolor"), ambientcolor);
+	gl.uniform3fv(gl.getUniformLocation(shaderProgram, "diffusecolor"), diffusecolor);
+	gl.uniform3fv(gl.getUniformLocation(shaderProgram, "diffuseplace"), diffuseplace);
 }
 function drawScene()
 {
@@ -275,22 +311,27 @@ function drawScene()
 	gl.viewport(0, 0, windowwidth, windowheight);
 
 	//matrix
-	setmodelmatrix();
-	setviewmatrix();
-	setprojmatrix();
+	setmatrix();
+	setlight();
 
 	//draw axis
 	gl.bindBuffer(gl.ARRAY_BUFFER, axishandle);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-	gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+	gl.disableVertexAttribArray(normalobject);
+
+	gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(positionobject);
+
 	gl.drawArrays(gl.LINES, 0, 6);
 
 	//draw shape
 	if(stlpointcount == 0)
 	{
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexhandle);
-		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+		gl.disableVertexAttribArray(normalobject);
+
+		gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(positionobject);
+
 		gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
 	}
 
@@ -298,8 +339,16 @@ function drawScene()
 	else
 	{
 		gl.bindBuffer(gl.ARRAY_BUFFER, stlhandle);
-		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, 3, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+		gl.vertexAttribPointer(normalobject, 3, gl.FLOAT, false, 24, 0);
+		gl.enableVertexAttribArray(normalobject);
+
+		gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 24, 12);
+		gl.enableVertexAttribArray(positionobject);
+
+		//gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 24, 0);
+		//gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+
 		gl.drawArrays(gl.TRIANGLES, 0, stlpointcount*3);
 	}
 }
