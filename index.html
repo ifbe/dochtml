@@ -11,6 +11,103 @@ function say(data)
 	debug.scrollTop=debug.scrollHeight;
 	console.log(data);
 }
+var stage=0;
+var ws;
+function send(data)
+{
+	//say(data);
+	if(stage>0)ws.send(data);
+}
+function sendbin(data)
+{
+	//var bin = new Uint8Array(1024*1024*3);
+	//for (var i = 0; i < 1024*1024; i+=3) {
+		//do something
+	//}
+	//ws.send(bin.buffer);
+}
+function sendblob(data)
+{
+	//var file = document.querySelector('input[type="file"]').files[0];
+	//ws.send(file);
+}
+function start()
+{
+	var server=document.getElementById("server").value;
+	var port=document.getElementById("port").value;
+	var username=document.getElementById("username").value;
+	var password=document.getElementById("password").value;
+
+	var url="ws://"+server+":"+port;
+	ws=new WebSocket(url);
+	ws.binaryType = 'arraybuffer';
+
+	ws.onmessage=function(event)
+	{
+		if(typeof event.data === "string")
+		{
+			if(stage==0x10)
+			{
+				//recv server_identity
+				say("[stage0][server]"+event.data);
+
+				//send username
+				send(username);
+				say("[stage1][client]username="+username);
+
+				stage=0x11;
+			}
+			else if(stage==0x11)
+			{
+				//recv fixed_salt temp_salt
+				say("[stage1][server]challenge="+event.data);
+
+				//send md5(temp_salt + md5(fixed_salt + password))
+				var arr=event.data.split(",");
+				var hash1=CryptoJS.SHA1(arr[0] + password);
+				say("	"+hash1);
+				var hash2=CryptoJS.SHA1(arr[1] + hash1);
+				say("	"+hash2);
+
+				send(hash2);
+				say("[stage2][client]response="+hash2);
+
+				stage=0x12;
+			}
+			else if(stage==0x12)
+			{
+				send("haha");
+				say("[stage2][server]status="+event.data);
+				stage=31;
+			}
+			else if(stage==31)
+			{
+				draw(event.data);
+			}
+		}
+		else //if(event.data instanceof ArrayBuffer)
+		{
+			pixel(event.data);
+		}
+	};
+	ws.onopen=function(event)
+	{
+		stage=16;
+		say("onopen:"+url);
+
+		var str="final answer?";
+		send(str);
+		say("[stage0][client]" + str);
+	};
+	ws.onclose=function(event)
+	{
+		say("connection closed:"+event.code);
+	};
+	ws.onerror=function(event)
+	{
+		say("something wrong");
+	};
+}
 window.onresize=function(){
 	var w = window.innerWidth
 	|| document.documentElement.clientWidth
@@ -34,7 +131,7 @@ window.onload=function() {
 	document.onkeydown=function(ev)
 	{
 		var k=ev.keyCode;
-		say("char "+k);
+		//say("char "+k);
 
 		if(k==8)			//back
 		{
@@ -56,6 +153,7 @@ window.onload=function() {
 		else if(k>=37&&k<=40)	//l,u,r,d
 		{
 			event.preventDefault();
+			send("char "+k);
 		}
 		else if(k>=48&&k<=57)	//[0,9](mainarea)
 		{
@@ -195,6 +293,7 @@ html,body{
 		port:<input type="text" id="port" value="2222" /><br />
 		username:<input type="text" id="username" value="42" /><br />
 		password:<input type="password" id="password" value="42" /><br />
+		<input type="submit" value="play" onclick="start()" />
 	</div>
 </div>
 
