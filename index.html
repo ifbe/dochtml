@@ -6,11 +6,39 @@
 <script type="text/javascript">
 function say(data)
 {
-	var debug=document.getElementById("debug");
-	debug.textContent=debug.textContent+data+"\n";
-	debug.scrollTop=debug.scrollHeight;
-	console.log(data);
+	var term=document.getElementById("term");
+	term.textContent=term.textContent+data+"\n";
+	term.scrollTop=term.scrollHeight;
+	//console.log(data);
 }
+function draw(data)
+{
+	say("[server] string "+data.length);
+	document.getElementById('f1').style.display="none";
+	document.getElementById('f2').style.display="none";
+	document.getElementById('f3').style.display="";
+	document.getElementById('f4').style.display="none";
+	document.getElementById('f3').innerHTML=data;
+}
+function pixel(data)
+{
+	say("[server] binary "+data.byteLength);
+	document.getElementById('f1').style.display="none";
+	document.getElementById('f2').style.display="";
+	document.getElementById('f3').style.display="none";
+	document.getElementById('f4').style.display="none";
+
+	var ctx = document.getElementById('pixel').getContext('2d');
+	var img = ctx.getImageData(0, 0, 512, 512);
+	var buf = new Uint8ClampedArray(data);
+
+	img.data.set(buf);
+	ctx.putImageData(img, 0, 0);
+}
+
+
+
+
 var stage=0;
 var ws;
 function send(data)
@@ -108,6 +136,10 @@ function start()
 		say("something wrong");
 	};
 }
+
+
+
+
 window.onresize=function(){
 	var w = window.innerWidth
 	|| document.documentElement.clientWidth
@@ -120,14 +152,15 @@ window.onresize=function(){
 	//updatesize(w,h);
 }
 window.onload=function() {
-	var f0=document.getElementById("f0");
+	say("window.onload");
 	var f1=document.getElementById("f1");
 	var f2=document.getElementById("f2");
 	var f3=document.getElementById("f3");
-	f0.style.display="";
+	var f4=document.getElementById("f4");
 	f1.style.display="none";
 	f2.style.display="none";
 	f3.style.display="none";
+	f4.style.display="";
 	document.onkeydown=function(ev)
 	{
 		var k=ev.keyCode;
@@ -176,31 +209,31 @@ window.onload=function() {
 
 			if(k==112)
 			{
-				f0.style.display="none";
 				f1.style.display="";
 				f2.style.display="none";
 				f3.style.display="none";
+				f4.style.display="none";
 			}
 			else if(k==113)
 			{
-				f0.style.display="none";
+				f4.style.display="none";
 				f1.style.display="none";
 				f2.style.display="";
 				f3.style.display="none";
 			}
 			else if(k==114)
 			{
-				f0.style.display="none";
 				f1.style.display="none";
 				f2.style.display="none";
 				f3.style.display="";
+				f4.style.display="none";
 			}
 			else
 			{
-				f0.style.display="";
 				f1.style.display="none";
 				f2.style.display="none";
 				f3.style.display="none";
+				f4.style.display="";
 			}
 		}
 		else if(k==187)
@@ -220,20 +253,6 @@ html,body{
 	overflow:hidden;
 }
 
-#f0 {
-	position:absolute;
-	width:100%;
-	height:100%;
-	opacity:0.8;
-	background:#444;
-	box-shadow:2px 2px 4px #eee;
-}
-#menu {
-	color:#fff;
-	font-size:64px;
-	text-align:center;
-}
-
 #f1 {
 	white-space:pre-wrap;
 	white-space:-moz-pre-wrap;
@@ -241,7 +260,7 @@ html,body{
 	white-space:-o-pre-wrap;
 	word-wrap:break-word;
 }
-#debug {
+#term {
 	position:absolute;
 	left:0%;
 	top:0%;
@@ -272,11 +291,27 @@ html,body{
 	opacity:0.8;
 	color:#fff;
 	background:#444;
+	text-align:center;
 	box-shadow:2px 2px 4px #eee;
 }
 #scene {
 	text-align:center;
 }
+
+#f4 {
+	position:absolute;
+	width:100%;
+	height:100%;
+	opacity:0.8;
+	background:#444;
+	box-shadow:2px 2px 4px #eee;
+}
+#menu {
+	color:#fff;
+	font-size:64px;
+	text-align:center;
+}
+
 </style>
 </head>
 
@@ -285,23 +320,8 @@ html,body{
 
 <body>
 
-<!-- this is login menu -->
-<div id="f0">
-	<div id="menu">
-		<br />
-		server:<input type="text" id="server" value="127.0.0.1" /><br />
-		port:<input type="text" id="port" value="2222" /><br />
-		username:<input type="text" id="username" value="42" /><br />
-		password:<input type="password" id="password" value="42" /><br />
-		<input type="submit" value="play" onclick="start()" />
-	</div>
-</div>
-
-<!-- (dimension=1)(text console) -->
-<pre id="f1">
-	<code id="debug">
-	</code>
-</pre>
+<!-- (dimension=1)(text console)(one line! no tab!) -->
+<pre id="f1"><code id="term"></code></pre>
 
 <!-- (dimension=2)(canvas pixel) -->
 <div id="f2">
@@ -317,37 +337,19 @@ html,body{
 
 <!-- (dimension=3)(webgl three.js) -->
 <div id="f3">
-	<h1 id="scene">haha</h1>
-	<!--
-	<script type="text/javascript">
-		function threedim()
-		{
-		var scene = new THREE.Scene();
-		var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+	haha
+</div>
 
-		var renderer = new THREE.WebGLRenderer();
-		renderer.setSize( window.innerWidth, window.innerHeight );
-		document.body.appendChild( renderer.domElement );
-
-		var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-		var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-		var cube = new THREE.Mesh( geometry, material );
-		scene.add( cube );
-		camera.position.z = 5;
-
-		var render = function ()
-		{
-			requestAnimationFrame( render );
-
-			cube.rotation.x += 0.1;
-			cube.rotation.y += 0.1;
-			renderer.render(scene, camera);
-		};
-
-		render();
-		}
-	</script>
-	-->
+<!-- this is login menu -->
+<div id="f4">
+	<div id="menu">
+		<br />
+		server:<input type="text" id="server" value="127.0.0.1" /><br />
+		port:<input type="text" id="port" value="2222" /><br />
+		username:<input type="text" id="username" value="42" /><br />
+		password:<input type="password" id="password" value="42" /><br />
+		<input type="submit" value="play" onclick="start()" />
+	</div>
 </div>
 
 </body>
