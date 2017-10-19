@@ -9,23 +9,28 @@ function say(data)
 	var term=document.getElementById("term");
 	term.textContent=term.textContent+data+"\n";
 	term.scrollTop=term.scrollHeight;
-	//console.log(data);
+	console.log(data);
 }
 function draw(data)
 {
-	say("[server] string "+data.length);
 	document.getElementById('f1').style.display="none";
-	document.getElementById('f2').style.display="none";
-	document.getElementById('f3').style.display="";
+	document.getElementById('f20').style.display="";
+	document.getElementById('f21').style.display="none";
+	document.getElementById('f30').style.display="none";
+	document.getElementById('f31').style.display="none";
 	document.getElementById('f4').style.display="none";
-	document.getElementById('f3').innerHTML=data;
+
+	say("[recv]str "+data.length);
+	document.getElementById('f20').innerHTML=data;
 }
 function pixel(data)
 {
-	say("[server] binary "+data.byteLength);
+	say("[recv]bin "+data.byteLength);
 	document.getElementById('f1').style.display="none";
-	document.getElementById('f2').style.display="";
-	document.getElementById('f3').style.display="none";
+	document.getElementById('f20').style.display="none";
+	document.getElementById('f21').style.display="";
+	document.getElementById('f30').style.display="none";
+	document.getElementById('f31').style.display="none";
 	document.getElementById('f4').style.display="none";
 
 	var ctx = document.getElementById('pixel').getContext('2d');
@@ -77,35 +82,34 @@ function start()
 			if(stage==0x10)
 			{
 				//recv server_identity
-				say("[stage0][server]"+event.data);
+				say("[recv]serverhello="+event.data);
 
 				//send username
 				send(username);
-				say("[stage1][client]username="+username);
+				say("[send]username="+username);
 
 				stage=0x11;
 			}
 			else if(stage==0x11)
 			{
-				//recv fixed_salt temp_salt
-				say("[stage1][server]challenge="+event.data);
+				//recv salt
+				say("[recv]challenge="+event.data);
 
-				//send md5(temp_salt + md5(fixed_salt + password))
-				var arr=event.data.split(",");
-				var hash1=CryptoJS.SHA1(arr[0] + password);
-				say("	"+hash1);
-				var hash2=CryptoJS.SHA1(arr[1] + hash1);
-				say("	"+hash2);
+				//send sha1(salt + sha1(password))
+				var hash1=CryptoJS.SHA1(password);
+				say("hash1="+hash1);
+
+				var hash2=CryptoJS.SHA1(event.data + hash1);
+				say("hash2="+hash2);
 
 				send(hash2);
-				say("[stage2][client]response="+hash2);
+				say("[send]response="+hash2);
 
 				stage=0x12;
 			}
 			else if(stage==0x12)
 			{
-				send("haha");
-				say("[stage2][server]status="+event.data);
+				say("[recv]status="+event.data);
 				stage=31;
 			}
 			else if(stage==31)
@@ -125,7 +129,7 @@ function start()
 
 		var str="final answer?";
 		send(str);
-		say("[stage0][client]" + str);
+		say("[send]clienthello=" + str);
 	};
 	ws.onclose=function(event)
 	{
@@ -133,7 +137,7 @@ function start()
 	};
 	ws.onerror=function(event)
 	{
-		say("something wrong");
+		say("something wrong:"+event.code);
 	};
 }
 
@@ -154,12 +158,16 @@ window.onresize=function(){
 window.onload=function() {
 	say("window.onload");
 	var f1=document.getElementById("f1");
-	var f2=document.getElementById("f2");
-	var f3=document.getElementById("f3");
+	var f20=document.getElementById("f20");
+	var f21=document.getElementById("f21");
+	var f30=document.getElementById("f30");
+	var f31=document.getElementById("f31");
 	var f4=document.getElementById("f4");
 	f1.style.display="none";
-	f2.style.display="none";
-	f3.style.display="none";
+	f20.style.display="none";
+	f21.style.display="none";
+	f30.style.display="none";
+	f31.style.display="none";
 	f4.style.display="";
 	document.onkeydown=function(ev)
 	{
@@ -210,29 +218,37 @@ window.onload=function() {
 			if(k==112)
 			{
 				f1.style.display="";
-				f2.style.display="none";
-				f3.style.display="none";
+				f20.style.display="none";
+				f21.style.display="none";
+				f30.style.display="none";
+				f31.style.display="none";
 				f4.style.display="none";
 			}
 			else if(k==113)
 			{
-				f4.style.display="none";
 				f1.style.display="none";
-				f2.style.display="";
-				f3.style.display="none";
+				f20.style.display="";
+				f21.style.display="none";
+				f30.style.display="none";
+				f31.style.display="none";
+				f4.style.display="none";
 			}
 			else if(k==114)
 			{
 				f1.style.display="none";
-				f2.style.display="none";
-				f3.style.display="";
+				f20.style.display="none";
+				f21.style.display="none";
+				f30.style.display="";
+				f31.style.display="none";
 				f4.style.display="none";
 			}
 			else
 			{
 				f1.style.display="none";
-				f2.style.display="none";
-				f3.style.display="none";
+				f20.style.display="none";
+				f21.style.display="none";
+				f30.style.display="none";
+				f31.style.display="none";
 				f4.style.display="";
 			}
 		}
@@ -271,7 +287,16 @@ html,body{
 	overflow-y:scroll;
 }
 
-#f2 {
+#f20 {
+	position:absolute;
+	width:100%;
+	height:100%;
+	opacity:0.8;
+	color:#fff;
+	background:#444;
+	box-shadow:2px 2px 4px #eee;
+}
+#f21 {
 	position:absolute;
 	width:100%;
 	height:100%;
@@ -284,7 +309,17 @@ html,body{
 	text-align:center;
 }
 
-#f3 {
+#f30 {
+	position:absolute;
+	width:100%;
+	height:100%;
+	opacity:0.8;
+	color:#fff;
+	background:#444;
+	text-align:center;
+	box-shadow:2px 2px 4px #eee;
+}
+#f31 {
 	position:absolute;
 	width:100%;
 	height:100%;
@@ -323,8 +358,13 @@ html,body{
 <!-- (dimension=1)(text console)(one line! no tab!) -->
 <pre id="f1"><code id="term"></code></pre>
 
+<!-- (dimension=2)(ws.str) -->
+<div id="f20">
+	f20
+</div>
+
 <!-- (dimension=2)(canvas pixel) -->
-<div id="f2">
+<div id="f21">
 	<canvas id="pixel" width="512" height="512">
 	</canvas>
 	<script type="text/javascript">
@@ -335,9 +375,14 @@ html,body{
 	</script>
 </div>
 
-<!-- (dimension=3)(webgl three.js) -->
-<div id="f3">
-	haha
+<!-- (dimension=3)(webgl) -->
+<div id="f30">
+	f30
+</div>
+
+<!-- (dimension=3)(webgl) -->
+<div id="f31">
+	f31
 </div>
 
 <!-- this is login menu -->
