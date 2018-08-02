@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <style>html,body{margin:0;padding:0;overflow:hidden;}</style>
-<script id="vshader" type="x-shader/x-vertex">
-attribute vec3 normal;
-attribute vec3 position;
-varying vec3 vColor;
+<script id="vshader" type="x-shader/x-vertex">#version 300 es
+layout(location = 0)in vec3 normal;
+layout(location = 1)in vec3 position;
+out vec3 vColor;
 uniform vec3 ambientcolor;
 uniform vec3 diffusecolor;
 uniform vec3 diffuseplace;
@@ -21,11 +21,12 @@ void main(void) {
 	gl_Position = proj * view * model * vec4(position, 1.0);
 }
 </script>
-<script id="fshader" type="x-shader/x-fragment">
+<script id="fshader" type="x-shader/x-fragment">#version 300 es
 precision mediump float;
-varying vec3 vColor;
+in vec3 vColor;
+out vec4 FragColor;
 void main(void) {
-	gl_FragColor = vec4(vColor, 1.0);
+	FragColor = vec4(vColor, 1.0);
 }
 </script>
 
@@ -144,12 +145,9 @@ var shaderProgram;
 var positionobject;
 var normalobject;
 function initwebgl(canvas) {
-        var canvas = document.getElementById("canvas");
-	try {
-		gl = canvas.getContext("experimental-webgl");
-	}
-	catch (e) {
-	}
+	var canvas = document.getElementById('canvas');
+	gl = canvas.getContext('webgl2');
+
 	if (!gl) {
 		alert("抱歉，不能初始化webGL！");
 	}

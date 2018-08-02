@@ -13,14 +13,14 @@ function say(data)
 }
 function draw(data)
 {
-	document.getElementById('f1').style.display="none";
-	document.getElementById('f20').style.display="";
-	document.getElementById('f21').style.display="none";
-	document.getElementById('f30').style.display="none";
-	document.getElementById('f31').style.display="none";
-	document.getElementById('f4').style.display="none";
+	//document.getElementById('f1').style.display="none";
+	//document.getElementById('f20').style.display="";
+	//document.getElementById('f21').style.display="none";
+	//document.getElementById('f30').style.display="none";
+	//document.getElementById('f31').style.display="none";
+	//document.getElementById('f4').style.display="none";
 
-	say("[recv]str "+data.length);
+	say(data);
 	document.getElementById('f20').innerHTML=data;
 }
 function pixel(data)
@@ -132,6 +132,13 @@ function start()
 		var str="final answer?";
 		send(str);
 		say("[send]clienthello=" + str);
+
+		document.getElementById('f1').style.display="none";
+		document.getElementById('f20').style.display="";
+		document.getElementById('f21').style.display="none";
+		document.getElementById('f30').style.display="none";
+		document.getElementById('f31').style.display="none";
+		document.getElementById('f4').style.display="none";
 	};
 	ws.onclose=function(event)
 	{
@@ -200,10 +207,12 @@ window.onload=function() {
 		}
 		else if(k>=48&&k<=57)	//[0,9](mainarea)
 		{
+			send("char "+k);
 		}
 		else if(k>=65&&k<=90)	//[a,z]
 		{
 			k=k+32;
+			send("char "+k);
 		}
 		else if(k>=96&&k<=105)	//[0,9](keypad)
 		{
