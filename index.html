@@ -7,9 +7,9 @@
 function say(data)
 {
 	var term=document.getElementById("term");
-	term.textContent=term.textContent+data+"\n";
+	term.textContent=term.textContent+data;
 	term.scrollTop=term.scrollHeight;
-	console.log(data);
+	//console.log(data);
 }
 function draw(data)
 {
@@ -25,7 +25,7 @@ function draw(data)
 }
 function pixel(data)
 {
-	say("[recv]bin "+data.byteLength);
+	say("[recv]bin "+data.byteLength+"\n");
 	document.getElementById('f1').style.display="none";
 	document.getElementById('f20').style.display="none";
 	document.getElementById('f21').style.display="";
@@ -127,11 +127,11 @@ function start()
 	ws.onopen=function(event)
 	{
 		stage=16;
-		say("onopen:"+url);
+		say("onopen:"+url+"\n");
 
 		var str="final answer?";
 		send(str);
-		say("[send]clienthello=" + str);
+		say("[send]clienthello=" + str + "\n");
 
 		document.getElementById('f1').style.display="none";
 		document.getElementById('f20').style.display="";
@@ -142,11 +142,11 @@ function start()
 	};
 	ws.onclose=function(event)
 	{
-		say("connection closed:"+event.code);
+		say("connection closed:"+event.code+"\n");
 	};
 	ws.onerror=function(event)
 	{
-		say("something wrong:"+event.code);
+		say("something wrong:"+event.code+"\n");
 	};
 }
 
@@ -165,7 +165,7 @@ window.onresize=function(){
 	//updatesize(w,h);
 }
 window.onload=function() {
-	say("window.onload");
+	say("window.onload\n");
 	var f1=document.getElementById("f1");
 	var f20=document.getElementById("f20");
 	var f21=document.getElementById("f21");
@@ -181,53 +181,53 @@ window.onload=function() {
 	document.onkeydown=function(ev)
 	{
 		var k=ev.keyCode;
-		//say("char "+k);
+		console.log(k);
 
-		if(k==8)			//back
-		{
+		if(8 == k){			//back
+			event.preventDefault();
+			send('\x7f');
+		}
+		else if(9 == k){		//tab
+			event.preventDefault();
+			send('\x09');
+		}
+		else if(13 == k){		//enter
+			send('\x0a');
+		}
+		else if(16 == k){
 			event.preventDefault();
 		}
-		else if(k==9)		//tab
-		{
-			event.preventDefault();
+		else if(27 == k){		//esc
+			send('\x1b');
 		}
-		else if(k==13)		//enter
-		{
+		else if(32 == k){		//space
+			send(' ');
 		}
-		else if(k==27)		//esc
-		{
-		}
-		else if(k==32)		//space
-		{
-		}
-		else if(k>=37&&k<=40)	//l,u,r,d
-		{
+		else if(k>=37&&k<=40){		//l,u,r,d
 			event.preventDefault();
 			send("kbd "+k);
 		}
-		else if(k>=48&&k<=57)	//[0,9](mainarea)
-		{
-			send("char "+k);
+		else if(k>=48&&k<=57){		//[0,9](mainarea)
+			send(String.fromCharCode(k));
 		}
-		else if(k>=65&&k<=90)	//[a,z]
-		{
-			k=k+32;
-			send("char "+k);
+		else if(k>=65&&k<=90){		//[a,z]
+			if(1 == ev.shiftKey){
+				send(String.fromCharCode(k));
+			}
+			else{
+				send(String.fromCharCode(k+32));
+			}
 		}
-		else if(k>=96&&k<=105)	//[0,9](keypad)
-		{
+		else if(k>=96&&k<=105){		//[0,9](keypad)
 			k=k-48;
 		}
-		else if(k>=106&&k<=111)	//*+
-		{
+		else if(k>=106&&k<=111){	//*+
 			k-=64;
 		}
-		else if(k>=112&&k<=115)	//f1,f2,f3,f4
-		{
+		else if(k>=112&&k<=115){	//f1,f2,f3,f4
 			event.preventDefault();
 
-			if(k==112)
-			{
+			if(112 == k){
 				f1.style.display="";
 				f20.style.display="none";
 				f21.style.display="none";
@@ -235,8 +235,7 @@ window.onload=function() {
 				f31.style.display="none";
 				f4.style.display="none";
 			}
-			else if(k==113)
-			{
+			else if(113 == k){
 				f1.style.display="none";
 				f20.style.display="";
 				f21.style.display="none";
@@ -244,8 +243,7 @@ window.onload=function() {
 				f31.style.display="none";
 				f4.style.display="none";
 			}
-			else if(k==114)
-			{
+			else if(114 == k){
 				f1.style.display="none";
 				f20.style.display="none";
 				f21.style.display="none";
@@ -253,8 +251,7 @@ window.onload=function() {
 				f31.style.display="none";
 				f4.style.display="none";
 			}
-			else
-			{
+			else{
 				f1.style.display="none";
 				f20.style.display="none";
 				f21.style.display="none";
@@ -263,11 +260,12 @@ window.onload=function() {
 				f4.style.display="";
 			}
 		}
-		else if(k==187)
-		{
+		else if(187 == k){
 		}
-		else
-		{
+		else if(191 == k){
+			send('/');
+		}
+		else{
 		}
 	}
 }
