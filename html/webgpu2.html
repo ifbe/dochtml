@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>html,body{margin:0;padding:0;overflow:hidden;}</style>
+</head>
+
+<body onload="birth()" onresize="resize()">
+
+<canvas id="canvas" >
+	hello
+</canvas>
+
+<script type="text/javascript">
+var windowwidth = 512;
+var windowheight = 512;
+
+function birth()
+{
+	console.log("birth");
+
+	if (!navigator.gpu){
+		console.log("WebGPU not supported on this browser.");
+	}
+	else{
+		console.log("WebGPU supported");
+	}
+}
+function resize()
+{
+	console.log("resize");
+	windowwidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+	windowheight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+	document.getElementById("canvas").width = windowwidth;
+	document.getElementById("canvas").height = windowheight;
+}
+window.onload=function(){
+	console.log("window.onload");
+	resize();
+
+	const adapterPromise = navigator.gpu.requestAdapter();
+	console.log(adapterPromise);
+
+	adapterPromise
+	.then(handleadapter)
+	.then(handledevice)
+}
+function handleadapter(adapter) {
+	console.log(adapter);
+	return adapter.requestDevice();
+}
+function handledevice(device){
+	console.log(device);
+
+	canvas = document.getElementById("canvas");
+	console.log(canvas);
+
+	const context = canvas.getContext('webgpu');
+	console.log(context);
+
+	const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
+	context.configure({
+		device: device,
+		format: canvasFormat,
+	});
+
+	const vertices = new Float32Array([
+		 0.0, 0.5, 0.0, 1.0, 0.0, 0.0,
+		-0.5,-0.5, 0.0, 0.0, 1.0, 0.0,
+		 0.5,-0.5, 0.0, 0.0, 0.0, 1.0,
+	]);
+
+	const vertexBuffer = device.createBuffer({
+		size: vertices.byteLength,
+		usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+	});
+	device.queue.writeBuffer(vertexBuffer, 0, vertices);
+
+	const cellShaderModule = device.createShaderModule({
+		code: `
+		struct PositionColorInput {
+			@location(0) pos: vec3f,
+			@location(1) rgb: vec3f,
+		};
+		struct PositionColorOutput {
+		@builtin(position) outpos: vec4f,
+		@location(0) outrgb: vec3f,
+		};
+		@vertex
+		fn vertexMain(input: PositionColorInput) -> PositionColorOutput {
+			var output: PositionColorOutput;
+			output.outrgb = input.rgb;
+			output.outpos = vec4f(input.pos, 1.0);
+			return output;
+		}
+		@fragment
+		fn fragmentMain(@location(0) in_color: vec3f) -> @location(0) vec4f {
+			return vec4f(in_color, 1);
+		}
+		`
+	});
+
+	const vertexBufferLayout = {
+		arrayStride: 24,
+		attributes: [
+			{
+			shaderLocation: 0,
+			format: "float32x3",
+			offset: 0,
+			},
+			{
+			shaderLocation: 1,
+			format: "float32x3",
+			offset: 12,
+			},
+		],
+	};
+
+	const cellPipeline = device.createRenderPipeline({
+		layout: device.createPipelineLayout({bindGroupLayouts: []}),
+		vertex: {
+			module: cellShaderModule,
+			entryPoint: "vertexMain",
+			buffers: [vertexBufferLayout]
+		},
+		fragment: {
+			module: cellShaderModule,
+			entryPoint: "fragmentMain",
+			targets: [{
+				format: canvasFormat,
+			}]
+		}
+	});
+
+	function render() {
+		const commandEncoder = device.createCommandEncoder();
+		const renderPassDescriptor = {
+			colorAttachments: [{
+				view: context.getCurrentTexture().createView(),
+				loadOp: "clear",
+				clearValue: { r: 0, g: 0, b: 0.0, a: 1 },
+				storeOp: 'store',
+			}]
+		};
+		const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+		passEncoder.setPipeline(cellPipeline);
+		passEncoder.setVertexBuffer(0, vertexBuffer);
+		passEncoder.draw(3, 1, 0, 0);
+		passEncoder.end();
+
+		device.queue.submit([commandEncoder.finish()]);
+	}
+
+	requestAnimationFrame(render);
+}
+</script>
+
+</body>
+
+</html>
