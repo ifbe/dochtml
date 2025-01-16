@@ -2,18 +2,50 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<style>html,body{margin:0;padding:0;overflow:hidden;}</style>
+<style>
+	html,body{margin:0;padding:0;overflow:hidden;height:100%;}
+	label,textarea{position:absolute;z-index:10;transform:translateX(-50%);}
+	#model_axisangle_label{      position:absolute;left:10%;width:20%;top: 0px;color:white;}
+	#model_axisangle_textarea{   position:absolute;left:10%;width:20%;top:20px;}
+	#model_quaternion_label{     position:absolute;left:10%;width:20%;top:40px;color:white;}
+	#model_quaternion_textarea{  position:absolute;left:10%;width:20%;top:60px;}
+	#model_matrix_label {        position:absolute;left:10%;width:20%;top:80px;color:white;}
+	#model_matrix_textarea {     position:absolute;left:10%;width:20%;top:100px;}
+
+	#camera_axisangle_label{     position:absolute;left:90%;width:20%;top: 0px;color:white;}
+	#camera_axisangle_textarea{  position:absolute;left:90%;width:20%;top:20px;}
+	#camera_quaternion_label{    position:absolute;left:90%;width:20%;top:40px;color:white;}
+	#camera_quaternion_textarea{ position:absolute;left:90%;width:20%;top:60px;}
+	#camera_matrix_label {       position:absolute;left:90%;width:20%;top:80px;color:white;}
+	#camera_matrix_textarea {    position:absolute;left:90%;width:20%;top:100px;}
+
+	#proj_matrix_full_label{   position:absolute;left:8%;width:16%;bottom: 0px;color:white;}
+	#proj_matrix_full_textarea{position:absolute;left:8%;width:16%;bottom:20px;}
+	#camera_matrix_full_label{   position:absolute;left:24%;width:16%;bottom: 0px;color:white;}
+	#camera_matrix_full_textarea{position:absolute;left:24%;width:16%;bottom:20px;}
+	#model_matrix_full_label{    position:absolute;left:40%;width:16%;bottom: 0px;color:white;}
+	#model_matrix_full_textarea{ position:absolute;left:40%;width:16%;bottom:20px;}
+	#local_position_label{       position:absolute;left:56%;width:16%;bottom: 0px;color:white;}
+	#local_position_textarea{    position:absolute;left:56%;width:16%;bottom:20px;}
+	#clip_position_label{      position:absolute;left:72%;width:16%;bottom: 0px;color:white;}
+	#clip_position_textarea{   position:absolute;left:72%;width:16%;bottom:20px;}
+	#ndc_position_label{      position:absolute;left:88%;width:16%;bottom: 0px;color:white;}
+	#ndc_position_textarea{   position:absolute;left:88%;width:16%;bottom:20px;}
+</style>
 <script id="vshader" type="x-shader/x-vertex">#version 300 es
 layout(location = 0)in vec3 n;
 layout(location = 1)in vec3 v;
+layout(location = 2)in vec3 c;
 out vec3 vertex;
 out vec3 normal;
+out vec3 coulor;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 void main(void) {
 	vertex = v;
 	normal = n;
+	coulor = c;
 	gl_Position = proj * view * model * vec4(v, 1.0);
 }
 </script>
@@ -21,9 +53,10 @@ void main(void) {
 precision mediump float;
 in vec3 vertex;
 in vec3 normal;
+in vec3 coulor;
 out vec4 FragColor;
 uniform vec3 camxyz;
-mediump vec3 sunxyz = vec3(100.0, 0.0, 1000.0);
+mediump vec3 sunxyz = vec3(400.0, 200.0, 1000.0);
 mediump vec3 lightcolor = vec3(1.0, 1.0, 1.0);
 mediump vec3 kambi = vec3(0.231250, 0.231250, 0.231250);
 mediump vec3 kdiff = vec3(0.277500, 0.277500, 0.277500);
@@ -33,14 +66,13 @@ vec3 phong(){
 	mediump vec3 L = normalize(sunxyz - vertex);
 	mediump float SN = max(dot(N, L), 0.0);
 	mediump vec3 ret = kambi + kdiff*SN;
-	if(SN<0.0)return lightcolor*ret;
-
-	mediump vec3 E = normalize(camxyz - vertex);
-	mediump vec3 H = normalize(E + L);
-	mediump float NH = max(dot(N, H), 0.0);
-	ret += kspec*pow(NH, 89.6);
-
-	return lightcolor * ret;
+	if(SN>0.0){
+		mediump vec3 E = normalize(camxyz - vertex);
+		mediump vec3 H = normalize(E + L);
+		mediump float NH = max(dot(N, H), 0.0);
+		ret += kspec*pow(NH, 89.6);
+	}
+	return lightcolor * coulor * ret;
 }
 //float shadow(){
 	//if(uvw.z - texture(tex0, uvw.xy).r > 0.000001)return 0.1;
@@ -62,55 +94,55 @@ function resize()
 	document.getElementById("canvas").width = windowwidth;
 	document.getElementById("canvas").height = windowheight;
 }
-
+//
 var axishandle;
-var vertexhandle;
-var indexhandle;
 var axisdata = [
-	-1000.0, 0.0, 0.0,
-	1000.0, 0.0, 0.0,
-	0.0, -1000.0, 0.0,
-	0.0, 1000.0, 0.0,
-	0.0, 0.0, -1000.0,
-	0.0, 0.0, 1000.0
+	-1000.0,     0.0,     0.0, 0.5, 0.5, 1.0,
+	 1000.0,     0.0,     0.0, 0.5, 0.5, 1.0,
+	    0.0, -1000.0,     0.0, 0.5, 1.0, 0.5,
+	    0.0,  1000.0,     0.0, 0.5, 1.0, 0.5,
+	    0.0,     0.0, -1000.0, 1.0, 0.5, 0.5,
+	    0.0,     0.0,  1000.0, 1.0, 0.5, 0.5
 ];
+var vertexhandle;
 var vertexdata = [
 	//l
-	-1.0,-1.0,-1.0,-1.0, 0.0, 0.0,
-	-1.0, 1.0,-1.0,-1.0, 0.0, 0.0,
-	-1.0,-1.0, 1.0,-1.0, 0.0, 0.0,
-	-1.0, 1.0, 1.0,-1.0, 0.0, 0.0,
+	-1.0,-1.0,-1.0,-1.0, 0.0, 0.0, 0.5, 0.5, 1.0,
+	-1.0, 1.0,-1.0,-1.0, 0.0, 0.0, 0.5, 0.5, 1.0,
+	-1.0,-1.0, 1.0,-1.0, 0.0, 0.0, 0.5, 0.5, 1.0,
+	-1.0, 1.0, 1.0,-1.0, 0.0, 0.0, 0.5, 0.5, 1.0,
 
 	//r
-	 1.0,-1.0,-1.0, 1.0, 0.0, 0.0,
-	 1.0, 1.0,-1.0, 1.0, 0.0, 0.0,
-	 1.0,-1.0, 1.0, 1.0, 0.0, 0.0,
-	 1.0, 1.0, 1.0, 1.0, 0.0, 0.0,
+	 1.0,-1.0,-1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+	 1.0, 1.0,-1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+	 1.0,-1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+	 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
 
 	//n
-	-1.0,-1.0,-1.0, 0.0,-1.0, 0.0,
-	 1.0,-1.0,-1.0, 0.0,-1.0, 0.0,
-	-1.0,-1.0, 1.0, 0.0,-1.0, 0.0,
-	 1.0,-1.0, 1.0, 0.0,-1.0, 0.0,
+	-1.0,-1.0,-1.0, 0.0,-1.0, 0.0, 0.5, 1.0, 0.5,
+	 1.0,-1.0,-1.0, 0.0,-1.0, 0.0, 0.5, 1.0, 0.5,
+	-1.0,-1.0, 1.0, 0.0,-1.0, 0.0, 0.5, 1.0, 0.5,
+	 1.0,-1.0, 1.0, 0.0,-1.0, 0.0, 0.5, 1.0, 0.5,
 
 	//f
-	-1.0, 1.0,-1.0, 0.0, 1.0, 0.0,
-	 1.0, 1.0,-1.0, 0.0, 1.0, 0.0,
-	-1.0, 1.0, 1.0, 0.0, 1.0, 0.0,
-	 1.0, 1.0, 1.0, 0.0, 1.0, 0.0,
+	-1.0, 1.0,-1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+	 1.0, 1.0,-1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+	-1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+	 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
 
 	//b
-	-1.0,-1.0,-1.0, 0.0, 0.0,-1.0,
-	 1.0,-1.0,-1.0, 0.0, 0.0,-1.0,
-	-1.0, 1.0,-1.0, 0.0, 0.0,-1.0,
-	 1.0, 1.0,-1.0, 0.0, 0.0,-1.0,
+	-1.0,-1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.5, 0.5,
+	 1.0,-1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.5, 0.5,
+	-1.0, 1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.5, 0.5,
+	 1.0, 1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.5, 0.5,
 
 	//t
-	-1.0,-1.0, 1.0, 0.0, 0.0, 1.0,
-	 1.0,-1.0, 1.0, 0.0, 0.0, 1.0,
-	-1.0, 1.0, 1.0, 0.0, 0.0, 1.0,
-	 1.0, 1.0, 1.0, 0.0, 0.0, 1.0
+	-1.0,-1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
+	 1.0,-1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
+	-1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
+	 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0
 ];
+var indexhandle;
 var indexdata = [
 	 0, 1, 2,	 1, 3, 2,
 	 4, 5, 6,	 5, 7, 6,
@@ -120,10 +152,11 @@ var indexdata = [
 	20,21,22,	21,23,22,
 	24,25,26,	25,27,26
 ];
-
+//
 var stlhandle;
 var arraybuffer;
 var stlpointcount=0;
+//
 function allowDrop(event)
 {
 	event.preventDefault();
@@ -242,6 +275,90 @@ function initshaders() {
 
 	positionobject = gl.getAttribLocation(shaderProgram, "v");
 	normalobject = gl.getAttribLocation(shaderProgram, "n");
+	colorobject = gl.getAttribLocation(shaderProgram, "c");
+}
+
+model_axan = new Float32Array([
+	0.0, 0.0, 1.0, 20.0
+]);
+model_quat = new Float32Array([
+	0.0, 0.0, 1.0, 0.0
+]);
+modelmatrix = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 0.0, 1.0
+]);
+function setmodelmatrix(aa)
+{
+	var c = Math.cos(aa[3]*Math.PI/180/2);
+	var s = Math.sin(aa[3]*Math.PI/180/2);
+	model_quat = [aa[0]*s, aa[1]*s, aa[2]*s, c];
+
+	modelmatrix[ 0] = 1.0 - (model_quat[1]*model_quat[1] + model_quat[2]*model_quat[2]) * 2.0;
+	modelmatrix[ 1] =       (model_quat[0]*model_quat[1] + model_quat[2]*model_quat[3]) * 2.0;
+	modelmatrix[ 2] =       (model_quat[0]*model_quat[2] - model_quat[1]*model_quat[3]) * 2.0;
+	modelmatrix[ 3] = 0.0;
+
+	modelmatrix[ 4] =       (model_quat[0]*model_quat[1] - model_quat[2]*model_quat[3]) * 2.0;
+	modelmatrix[ 5] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[2]*model_quat[2]) * 2.0;
+	modelmatrix[ 6] =       (model_quat[1]*model_quat[2] + model_quat[0]*model_quat[3]) * 2.0;
+	modelmatrix[ 7] = 0.0;
+
+	modelmatrix[ 8] =       (model_quat[0]*model_quat[2] + model_quat[1]*model_quat[3]) * 2.0;
+	modelmatrix[ 9] =       (model_quat[1]*model_quat[2] - model_quat[0]*model_quat[3]) * 2.0;
+	modelmatrix[10] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[1]*model_quat[1]) * 2.0;
+	modelmatrix[11] = 0.0;
+
+	modelmatrix[12] = 0.0;
+	modelmatrix[13] = 0.0;
+	modelmatrix[14] = 0.0;
+	modelmatrix[15] = 1.0;
+}
+var updated_model = 0;
+function updateui_model(aa)
+{
+	if(updated_model==1){
+		return;
+	}
+	updated_model=1
+
+	let str = '';
+	str += aa[0].toFixed(3) + ', ';
+	str += aa[1].toFixed(3) + ', ';
+	str += aa[2].toFixed(3) + ', ';
+	str += aa[3].toFixed(3);
+	document.getElementById('model_axisangle_textarea').value = str;
+
+	//
+	str = '';
+	str += model_quat[0].toFixed(3) + ', ';
+	str += model_quat[1].toFixed(3) + ', ';
+	str += model_quat[2].toFixed(3) + ', ';
+	str += model_quat[3].toFixed(3);
+	document.getElementById('model_quaternion_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(modelmatrix[j] >= 0)str += ' ';
+		str += modelmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('model_matrix_textarea').value = str;
+}
+function setmatrix_model(type)
+{
+	if(type == 0){
+		var aa = [0,0,1, 0];
+		setmodelmatrix(aa);
+	}
+	else{
+		setmodelmatrix(model_axan);
+		updateui_model(model_axan);
+	}
+	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), false, modelmatrix);
 }
 
 var camerax = 0.0;
@@ -253,11 +370,11 @@ var centerz = 0.0;
 var abovex = 0.0;
 var abovey = 0.0;
 var abovez = 1.0;
-modelmatrix = new Float32Array([
-	1.0, 0.0, 0.0, 0.0,
-	0.0, 1.0, 0.0, 0.0,
-	0.0, 0.0, 1.0, 0.0, 
-	0.0, 0.0, 0.0, 1.0
+camera_axan = new Float32Array([
+	0.0, 0.0, 1.0, 20.0
+]);
+camera_quat = new Float32Array([
+	0.0, 0.0, 1.0, 0.0
 ]);
 viewmatrix = new Float32Array([
 	1.0, 0.0, 0.0, 0.0,
@@ -265,16 +382,7 @@ viewmatrix = new Float32Array([
 	0.0, 0.0, 1.0, 0.0, 
 	0.0, 0.0, 0.0, 1.0
 ]);
-projmatrix = new Float32Array([
-	1.0, 0.0, 0.0, 0.0,
-	0.0, 1.0, 0.0, 0.0,
-	0.0, 0.0, -1.0, -1.0,
-	0.0, 0.0, -0.2, 0.0
-]);
-function setmodelmatrix()
-{
-}
-function setviewmatrix()
+function setmatrix_view()
 {
 	var norm;
 
@@ -301,6 +409,47 @@ function setviewmatrix()
 	var vy = uz*nx - ux*nz;
 	var vz = ux*ny - uy*nx;
 
+	//axisangle = cross(oldvec, newvec)
+	var tmpx = 1*nz - 0*ny;
+	var tmpy = 0*nx - 0*nz;
+	var tmpz = 0*ny - 1*nx;
+	var tmpl = Math.sqrt(tmpx*tmpx + tmpy*tmpy + tmpz*tmpz);
+	var angle = Math.asin(tmpl);
+	camera_axan = [tmpx/tmpl, tmpy/tmpl, tmpz/tmpl, angle*180/Math.PI];
+
+	//quaternion
+	var c = Math.cos(angle/2);	//divide by 2: it's quaternion
+	var s = Math.sin(angle/2);
+	camera_quat[0] = camera_axan[0]*s;
+	camera_quat[1] = camera_axan[1]*s;
+	camera_quat[2] = camera_axan[2]*s;
+	camera_quat[3] = c;
+
+	//rotatematrix
+	viewmatrix[ 0] = ux;
+	viewmatrix[ 1] = nx;
+	viewmatrix[ 2] = vx;
+	viewmatrix[ 3] = 0.0;
+
+	viewmatrix[ 4] = uy;
+	viewmatrix[ 5] = ny;
+	viewmatrix[ 6] = vy;
+	viewmatrix[ 7] = 0.0;
+
+	viewmatrix[ 8] = uz;
+	viewmatrix[ 9] = nz;
+	viewmatrix[10] = vz;
+	viewmatrix[11] = 0.0;
+
+	viewmatrix[12] = 0.0;
+	viewmatrix[13] = 0.0;
+	viewmatrix[14] = 0.0;
+	viewmatrix[15] = 1.0;
+
+	updateui_camera();
+
+
+	//matrix: X-above-far
 	viewmatrix[0] = ux;
 	viewmatrix[1] = vx;
 	viewmatrix[2] = -nx;
@@ -322,19 +471,133 @@ function setviewmatrix()
 	viewmatrix[15] = 1.0;
 
 }
+
+projmatrix = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, -1.0, -1.0,
+	0.0, 0.0, -0.2, 0.0
+]);
 function setprojmatrix()
 {
 	projmatrix[5] = windowwidth / windowheight;
 }
-function setmatrix()
+
+var updated_camera = 0;
+function updateui_camera()
 {
-	setmodelmatrix();
-	setviewmatrix();
+	if(updated_camera==1){
+		return;
+	}
+	updated_camera=1
+
+	let str = '';
+	str += camera_axan[0].toFixed(3) + ', ';
+	str += camera_axan[1].toFixed(3) + ', ';
+	str += camera_axan[2].toFixed(3) + ', ';
+	str += camera_axan[3].toFixed(3);
+	document.getElementById('camera_axisangle_textarea').value = str;
+
+	//
+	str = '';
+	str += camera_quat[0].toFixed(3) + ', ';
+	str += camera_quat[1].toFixed(3) + ', ';
+	str += camera_quat[2].toFixed(3) + ', ';
+	str += camera_quat[3].toFixed(3);
+	document.getElementById('camera_quaternion_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(viewmatrix[j] >= 0)str += ' ';
+		str += viewmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('camera_matrix_textarea').value = str;
+}
+function updateui_multiply(){
+	let vec = [1, 1, 1, 1];
+	let m_vec = [
+		modelmatrix[ 0]*vec[0] + modelmatrix[ 4]*vec[1] + modelmatrix[ 8]*vec[2] + modelmatrix[12]*vec[3],
+		modelmatrix[ 1]*vec[0] + modelmatrix[ 5]*vec[1] + modelmatrix[ 9]*vec[2] + modelmatrix[13]*vec[3],
+		modelmatrix[ 2]*vec[0] + modelmatrix[ 6]*vec[1] + modelmatrix[10]*vec[2] + modelmatrix[14]*vec[3],
+		modelmatrix[ 3]*vec[0] + modelmatrix[ 7]*vec[1] + modelmatrix[11]*vec[2] + modelmatrix[15]*vec[3]
+	];
+	let w_m_vec = [
+		viewmatrix[ 0]*m_vec[0] + viewmatrix[ 4]*m_vec[1] + viewmatrix[ 8]*m_vec[2] + viewmatrix[12]*m_vec[3],
+		viewmatrix[ 1]*m_vec[0] + viewmatrix[ 5]*m_vec[1] + viewmatrix[ 9]*m_vec[2] + viewmatrix[13]*m_vec[3],
+		viewmatrix[ 2]*m_vec[0] + viewmatrix[ 5]*m_vec[1] + viewmatrix[10]*m_vec[2] + viewmatrix[14]*m_vec[3],
+		viewmatrix[ 3]*m_vec[0] + viewmatrix[ 7]*m_vec[1] + viewmatrix[11]*m_vec[2] + viewmatrix[15]*m_vec[3]
+	];
+	let p_w_m_vec = [
+		projmatrix[ 0]*w_m_vec[0] + projmatrix[ 4]*w_m_vec[1] + projmatrix[ 8]*w_m_vec[2] + projmatrix[12]*w_m_vec[3],
+		projmatrix[ 1]*w_m_vec[0] + projmatrix[ 5]*w_m_vec[1] + projmatrix[ 9]*w_m_vec[2] + projmatrix[13]*w_m_vec[3],
+		projmatrix[ 2]*w_m_vec[0] + projmatrix[ 6]*w_m_vec[1] + projmatrix[10]*w_m_vec[2] + projmatrix[14]*w_m_vec[3],
+		projmatrix[ 3]*w_m_vec[0] + projmatrix[ 7]*w_m_vec[1] + projmatrix[11]*w_m_vec[2] + projmatrix[15]*w_m_vec[3]
+	];
+	let ndc = [p_w_m_vec[0]/p_w_m_vec[3], p_w_m_vec[1]/p_w_m_vec[3], p_w_m_vec[2]/p_w_m_vec[3], 1.0];
+
+	//
+	let str = '';
+	for(let j=0;j<16;j++){
+		if(projmatrix[j] >= 0)str += ' ';
+		str += projmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('proj_matrix_full_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(viewmatrix[j] >= 0)str += ' ';
+		str += viewmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('camera_matrix_full_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(modelmatrix[j] >= 0)str += ' ';
+		str += modelmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('model_matrix_full_textarea').value = str;
+
+	str = '';
+	str += vec[0].toFixed(3) + ', ';
+	str += vec[1].toFixed(3) + ', ';
+	str += vec[2].toFixed(3) + ', ';
+	str += vec[3].toFixed(3);
+	document.getElementById('local_position_textarea').value = str;
+
+	//
+	str = '';
+	str += p_w_m_vec[0].toFixed(3) + ', ';
+	str += p_w_m_vec[1].toFixed(3) + ', ';
+	str += p_w_m_vec[2].toFixed(3) + ', ';
+	str += p_w_m_vec[3].toFixed(3);
+	document.getElementById('clip_position_textarea').value = str;
+
+	//
+	str = '';
+	str += ndc[0].toFixed(3) + ', ';
+	str += ndc[1].toFixed(3) + ', ';
+	str += ndc[2].toFixed(3) + ', ';
+	str += ndc[3].toFixed(3);
+	document.getElementById('ndc_position_textarea').value = str;
+}
+function setcamera()
+{
+	var camxyz = new Float32Array([camerax, cameray, cameraz]);
+	gl.uniform3fv(gl.getUniformLocation(shaderProgram, "camxyz"), camxyz);
+
+	setmatrix_view();
 	setprojmatrix();
-	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), false, modelmatrix);
 	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "view"), false, viewmatrix);
 	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "proj"), false, projmatrix);
 }
+
 function setlight()
 {
 	//var ambientcolor = new Float32Array([0.2, 0.2, 0.2]);
@@ -343,8 +606,6 @@ function setlight()
 	//gl.uniform3fv(gl.getUniformLocation(shaderProgram, "ambientcolor"), ambientcolor);
 	//gl.uniform3fv(gl.getUniformLocation(shaderProgram, "diffusecolor"), diffusecolor);
 	//gl.uniform3fv(gl.getUniformLocation(shaderProgram, "diffuseplace"), diffuseplace);
-	var camxyz = new Float32Array([camerax, cameray, cameraz]);
-	gl.uniform3fv(gl.getUniformLocation(shaderProgram, "camxyz"), camxyz);
 }
 function drawScene()
 {
@@ -355,28 +616,38 @@ function drawScene()
 	gl.viewport(0, 0, windowwidth, windowheight);
 
 	//matrix
-	setmatrix();
+	setcamera();
 	setlight();
 
 	//draw axis
+	setmatrix_model(0);
+
 	gl.bindBuffer(gl.ARRAY_BUFFER, axishandle);
 	gl.disableVertexAttribArray(normalobject);
 
-	gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 0, 0);
+	gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 24, 0);
 	gl.enableVertexAttribArray(positionobject);
+
+	gl.vertexAttribPointer(colorobject, 3, gl.FLOAT, false, 24, 12);
+	gl.enableVertexAttribArray(colorobject);
 
 	gl.drawArrays(gl.LINES, 0, 6);
 
 	//draw shape
+	setmatrix_model(1);
+
 	if(stlpointcount == 0)
 	{
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexhandle);
 
-		gl.vertexAttribPointer(normalobject, 3, gl.FLOAT, false, 24, 12);
+		gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 36, 0);
+		gl.enableVertexAttribArray(positionobject);
+
+		gl.vertexAttribPointer(normalobject, 3, gl.FLOAT, false, 36, 12);
 		gl.enableVertexAttribArray(normalobject);
 
-		gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 24, 0);
-		gl.enableVertexAttribArray(positionobject);
+		gl.vertexAttribPointer(colorobject, 3, gl.FLOAT, false, 36, 24);
+		gl.enableVertexAttribArray(colorobject);
 
 		gl.drawElements(gl.TRIANGLES, 3*12, gl.UNSIGNED_SHORT, 0);
 	}
@@ -386,17 +657,22 @@ function drawScene()
 	{
 		gl.bindBuffer(gl.ARRAY_BUFFER, stlhandle);
 
-		gl.vertexAttribPointer(normalobject, 3, gl.FLOAT, false, 24, 0);
+		gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 36, 12);
+		gl.enableVertexAttribArray(positionobject);
+
+		gl.vertexAttribPointer(normalobject, 3, gl.FLOAT, false, 36, 0);
 		gl.enableVertexAttribArray(normalobject);
 
-		gl.vertexAttribPointer(positionobject, 3, gl.FLOAT, false, 24, 12);
-		gl.enableVertexAttribArray(positionobject);
+		gl.vertexAttribPointer(colorobject, 3, gl.FLOAT, false, 36, 24);
+		gl.enableVertexAttribArray(colorobject);
 
 		//gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, 3, gl.FLOAT, false, 24, 0);
 		//gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
 
 		gl.drawArrays(gl.TRIANGLES, 0, stlpointcount*3);
 	}
+
+	updateui_multiply();
 }
 
 function birth()
@@ -430,18 +706,18 @@ function birth()
 function quaternion_rotate(v, q)
 {
 	var j = new Float32Array(4);
-        var k = new Float32Array(4);
-        j[0] = (q[1]*v[2]-q[2]*v[1]) * 2;
-        j[1] = (q[2]*v[0]-q[0]*v[2]) * 2;
-        j[2] = (q[0]*v[1]-q[1]*v[0]) * 2;
+	var k = new Float32Array(4);
+	j[0] = (q[1]*v[2]-q[2]*v[1]) * 2;
+	j[1] = (q[2]*v[0]-q[0]*v[2]) * 2;
+	j[2] = (q[0]*v[1]-q[1]*v[0]) * 2;
 
-        k[0] = q[1]*j[2]-q[2]*j[1];
-        k[1] = q[2]*j[0]-q[0]*j[2];
-        k[2] = q[0]*j[1]-q[1]*j[0];
+	k[0] = q[1]*j[2]-q[2]*j[1];
+	k[1] = q[2]*j[0]-q[0]*j[2];
+	k[2] = q[0]*j[1]-q[1]*j[0];
 
-        v[0] += q[3]*j[0] + k[0];
-        v[1] += q[3]*j[1] + k[1];
-        v[2] += q[3]*j[2] + k[2];
+	v[0] += q[3]*j[0] + k[0];
+	v[1] += q[3]*j[1] + k[1];
+	v[2] += q[3]*j[2] + k[2];
 
 	camerax = centerx + v[0];
 	cameray = centery + v[1];
@@ -531,6 +807,7 @@ function mousewheel(ev)
 		cameray = 1.1*ty - 0.1*centery;
 		cameraz = 1.1*tz - 0.1*centerz;
 	}
+	updated_camera = 0;
 }
 function mousedown(ev)
 {
@@ -540,6 +817,7 @@ function mousedown(ev)
 }
 function mouseup(ev)
 {
+	updated_camera = 0;
 	flag = 0;
 }
 function mousemove(ev)
@@ -554,6 +832,8 @@ function mousemove(ev)
 	if(newy > oldy)surroundrotatey(-0.05);
 	oldx = newx;
 	oldy = newy;
+
+	updated_camera = 0;
 }
 function touchmove(ev)
 {
@@ -569,11 +849,77 @@ function touchmove(ev)
 	oldx = newx;
 	oldy = newy;
 }
+function model_aa_keydown(ev)
+{
+	if (ev.key === 'Enter') {
+		console.log(ev);
+		ev.preventDefault();
+
+		let text = document.getElementById("model_axisangle_textarea").value;
+		console.log(text);
+		if(text==null)return;
+
+		let arr = text.split(/\s+/);
+		console.log(arr);
+		if(arr.length < 4)return;
+
+		model_axan = arr.slice(0, 4).map(value => parseFloat(value));
+		console.log(model_axan);
+		updated_model = 0;
+	}
+}
+function camera_aa_keydown(ev)
+{
+	if (ev.key === 'Enter') {
+		console.log(ev);
+		ev.preventDefault();
+
+		let text = document.getElementById("camera_axisangle_textarea").value;
+		console.log(text);
+		if(text==null)return;
+
+		let arr = text.split(/\s+/);
+		console.log(arr);
+		if(arr.length < 4)return;
+
+		camera_axan = arr.slice(0, 4).map(value => parseFloat(value));
+		console.log(camera_axan);
+		updated_model = 0;
+	}
+}
 </script>
 </head>
 
-<body onload="birth()" onresize="resize()" ondragover="allowDrop(event)" ondrop="dropfile(event)" onkeydown="keydown(event)" onmousewheel="mousewheel(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
-    <canvas id="canvas" ></canvas>
+<body onload="birth()" onresize="resize()">
+	<canvas id="canvas" ondragover="allowDrop(event)" ondrop="dropfile(event)" onkeydown="keydown(event)" onmousewheel="mousewheel(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
+	</canvas>
+
+	<label id="model_axisangle_label">model_axisangle</label>
+	<textarea id="model_axisangle_textarea" rows="1" cols="30" onkeydown="model_aa_keydown(event)"></textarea>
+	<label id="model_quaternion_label">model_quaternion</label>
+	<textarea id="model_quaternion_textarea" rows="1" cols="30"></textarea>
+	<label id="model_matrix_label">model_matrix_rotate</label>
+	<textarea id="model_matrix_textarea" rows="5" cols="30"></textarea>
+
+	<label id="camera_axisangle_label">camera_axisangle</label>
+	<textarea id="camera_axisangle_textarea" rows="1" cols="30" onkeydown="camera_aa_keydown(event)"></textarea>
+	<label id="camera_quaternion_label">camera_quaternion</label>
+	<textarea id="camera_quaternion_textarea" rows="1" cols="30"></textarea>
+	<label id="camera_matrix_label">camera_matrix_rotate</label>
+	<textarea id="camera_matrix_textarea" rows="5" cols="30"></textarea>
+
+	<label id="proj_matrix_full_label">proj_matrix</label>
+	<textarea id="proj_matrix_full_textarea" rows="5" cols="30"></textarea>
+	<label id="camera_matrix_full_label">camera_matrix</label>
+	<textarea id="camera_matrix_full_textarea" rows="5" cols="30"></textarea>
+	<label id="model_matrix_full_label">model_matrix</label>
+	<textarea id="model_matrix_full_textarea" rows="5" cols="30"></textarea>
+	<label id="local_position_label">local_position</label>
+	<textarea id="local_position_textarea" rows="1" cols="30"></textarea>
+	<label id="clip_position_label">clip_position</label>
+	<textarea id="clip_position_textarea" rows="1" cols="30"></textarea>
+	<label id="ndc_position_label">ndc_position</label>
+	<textarea id="ndc_position_textarea" rows="1" cols="30"></textarea>
 </body>
 
 </html>
