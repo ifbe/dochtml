@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
+
 <style>
 	html,body{margin:0;padding:0;overflow:hidden;height:100%;}
 	label,textarea{position:absolute;z-index:10;transform:translateX(-50%);}
@@ -12,26 +13,122 @@
 	#model_matrix_label {        position:absolute;left:10%;width:20%;top:80px;color:white;}
 	#model_matrix_textarea {     position:absolute;left:10%;width:20%;top:100px;}
 
-	#camera_axisangle_label{     position:absolute;left:90%;width:20%;top: 0px;color:white;}
-	#camera_axisangle_textarea{  position:absolute;left:90%;width:20%;top:20px;}
-	#camera_quaternion_label{    position:absolute;left:90%;width:20%;top:40px;color:white;}
-	#camera_quaternion_textarea{ position:absolute;left:90%;width:20%;top:60px;}
-	#camera_matrix_label {       position:absolute;left:90%;width:20%;top:80px;color:white;}
-	#camera_matrix_textarea {    position:absolute;left:90%;width:20%;top:100px;}
+	#camera_position_label{      position:absolute;left:90%;width:20%;top:  0px;color:white;}
+	#camera_position_textarea{   position:absolute;left:90%;width:20%;top: 20px;}
+	#camera_axisangle_label{     position:absolute;left:90%;width:20%;top: 40px;color:white;}
+	#camera_axisangle_textarea{  position:absolute;left:90%;width:20%;top: 60px;}
+	#camera_quaternion_label{    position:absolute;left:90%;width:20%;top: 80px;color:white;}
+	#camera_quaternion_textarea{ position:absolute;left:90%;width:20%;top:100px;}
+	#camera_matrix_label {       position:absolute;left:90%;width:20%;top:120px;color:white;}
+	#camera_matrix_textarea {    position:absolute;left:90%;width:20%;top:140px;}
 
-	#proj_matrix_full_label{   position:absolute;left:8%;width:16%;bottom: 0px;color:white;}
-	#proj_matrix_full_textarea{position:absolute;left:8%;width:16%;bottom:20px;}
-	#camera_matrix_full_label{   position:absolute;left:24%;width:16%;bottom: 0px;color:white;}
-	#camera_matrix_full_textarea{position:absolute;left:24%;width:16%;bottom:20px;}
-	#model_matrix_full_label{    position:absolute;left:40%;width:16%;bottom: 0px;color:white;}
-	#model_matrix_full_textarea{ position:absolute;left:40%;width:16%;bottom:20px;}
-	#local_position_label{       position:absolute;left:56%;width:16%;bottom: 0px;color:white;}
-	#local_position_textarea{    position:absolute;left:56%;width:16%;bottom:20px;}
-	#clip_position_label{      position:absolute;left:72%;width:16%;bottom: 0px;color:white;}
-	#clip_position_textarea{   position:absolute;left:72%;width:16%;bottom:20px;}
-	#ndc_position_label{      position:absolute;left:88%;width:16%;bottom: 0px;color:white;}
-	#ndc_position_textarea{   position:absolute;left:88%;width:16%;bottom:20px;}
+	#proj_inverse_full_label{     position:absolute;left:35%;width:16%;bottom:100px;color:white;}
+	#proj_inverse_full_textarea{  position:absolute;left:35%;width:16%;bottom:120px;}
+	#camera_inverse_full_label{   position:absolute;left:60%;width:16%;bottom:100px;color:white;}
+	#camera_inverse_full_textarea{position:absolute;left:60%;width:16%;bottom:120px;}
+	#model_inverse_full_label{    position:absolute;left:85%;width:16%;bottom:100px;color:white;}
+	#model_inverse_full_textarea{ position:absolute;left:85%;width:16%;bottom:120px;}
+
+	#local_inverse_label{       position:absolute;left:96%;width:4%;bottom:100px;color:white;}
+	#local_inverse_textarea{    position:absolute;left:96%;width:4%;bottom:120px;}
+	#world_inverse_label{       position:absolute;left:72%;width:4%;bottom:100px;color:white;}
+	#world_inverse_textarea{    position:absolute;left:72%;width:4%;bottom:120px;}
+	#view_inverse_label{        position:absolute;left:48%;width:4%;bottom:100px;color:white;}
+	#view_inverse_textarea{     position:absolute;left:48%;width:4%;bottom:120px;}
+	#clip_inverse_label{        position:absolute;left:22%;width:4%;bottom:100px;color:white;}
+	#clip_inverse_textarea{     position:absolute;left:22%;width:4%;bottom:120px;}
+	#ndc_inverse_label{         position:absolute;left:16%;width:4%;bottom:100px;color:white;}
+	#ndc_inverse_textarea{      position:absolute;left:16%;width:4%;bottom:120px;}
+	#vp_inverse_label{          position:absolute;left:10%;width:4%;bottom:100px;color:white;}
+	#vp_inverse_textarea{       position:absolute;left:10%;width:4%;bottom:120px;}
+
+	#proj_matrix_full_label{      position:absolute;left:35%;width:16%;bottom: 0px;color:white;}
+	#proj_matrix_full_textarea{   position:absolute;left:35%;width:16%;bottom:20px;}
+	#camera_matrix_full_label{    position:absolute;left:60%;width:16%;bottom: 0px;color:white;}
+	#camera_matrix_full_textarea{ position:absolute;left:60%;width:16%;bottom:20px;}
+	#model_matrix_full_label{     position:absolute;left:85%;width:16%;bottom: 0px;color:white;}
+	#model_matrix_full_textarea{  position:absolute;left:85%;width:16%;bottom:20px;}
+
+	#local_position_label{       position:absolute;left:96%;width:4%;bottom: 0px;color:white;}
+	#local_position_textarea{    position:absolute;left:96%;width:4%;bottom:20px;}
+	#world_position_label{       position:absolute;left:72%;width:4%;bottom: 0px;color:white;}
+	#world_position_textarea{    position:absolute;left:72%;width:4%;bottom:20px;}
+	#view_position_label{        position:absolute;left:48%;width:4%;bottom: 0px;color:white;}
+	#view_position_textarea{     position:absolute;left:48%;width:4%;bottom:20px;}
+	#clip_position_label{        position:absolute;left:22%;width:4%;bottom: 0px;color:white;}
+	#clip_position_textarea{     position:absolute;left:22%;width:4%;bottom:20px;}
+	#ndc_position_label{         position:absolute;left:16%;width:4%;bottom: 0px;color:white;}
+	#ndc_position_textarea{      position:absolute;left:16%;width:4%;bottom:20px;}
+	#vp_position_label{          position:absolute;left:10%;width:4%;bottom: 0px;color:white;}
+	#vp_position_textarea{       position:absolute;left:10%;width:4%;bottom:20px;}
+	#fb_position_label{          position:absolute;left:4%;width:4%;bottom:40px;color:white;}
+	#fb_position_textarea{       position:absolute;left:4%;width:4%;bottom:60px;}
 </style>
+
+</head>
+<body onload="birth()" onresize="resize()">
+
+<canvas id="canvas" ondragover="allowDrop(event)" ondrop="dropfile(event)" onkeydown="keydown(event)" onmousewheel="mousewheel(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
+</canvas>
+
+<label id="model_axisangle_label">model_axisangle</label>
+<textarea id="model_axisangle_textarea" rows="1" cols="30" onkeydown="model_aa_keydown(event)"></textarea>
+<label id="model_quaternion_label">model_quaternion</label>
+<textarea id="model_quaternion_textarea" rows="1" cols="30"></textarea>
+<label id="model_matrix_label">model_matrix_rotate</label>
+<textarea id="model_matrix_textarea" rows="5" cols="30"></textarea>
+
+<label id="camera_position_label">camera_position</label>
+<textarea id="camera_position_textarea" rows="1" cols="30"></textarea>
+<label id="camera_axisangle_label">camera_axisangle</label>
+<textarea id="camera_axisangle_textarea" rows="1" cols="30" onkeydown="camera_aa_keydown(event)"></textarea>
+<label id="camera_quaternion_label">camera_quaternion</label>
+<textarea id="camera_quaternion_textarea" rows="1" cols="30"></textarea>
+<label id="camera_matrix_label">camera_matrix_rotate</label>
+<textarea id="camera_matrix_textarea" rows="5" cols="30"></textarea>
+
+<label id="proj_inverse_full_label">proj_inverse</label>
+<textarea id="proj_inverse_full_textarea" rows="4" cols="30"></textarea>
+<label id="camera_inverse_full_label">camera_inverse</label>
+<textarea id="camera_inverse_full_textarea" rows="4" cols="30"></textarea>
+<label id="model_inverse_full_label">model_inverse</label>
+<textarea id="model_inverse_full_textarea" rows="4" cols="30"></textarea>
+
+<label id="local_inverse_label">local_position</label>
+<textarea id="local_inverse_textarea" rows="4" cols="30"></textarea>
+<label id="world_inverse_label">world_inverse</label>
+<textarea id="world_inverse_textarea" rows="4" cols="30"></textarea>
+<label id="view_inverse_label">view_inverse</label>
+<textarea id="view_inverse_textarea" rows="4" cols="30"></textarea>
+<label id="clip_inverse_label">clip_inverse</label>
+<textarea id="clip_inverse_textarea" rows="4" cols="30"></textarea>
+<label id="ndc_inverse_label">ndc_inverse</label>
+<textarea id="ndc_inverse_textarea" rows="4" cols="30"></textarea>
+<label id="vp_inverse_label">vp_inverse</label>
+<textarea id="vp_inverse_textarea" rows="4" cols="30"></textarea>
+
+<label id="proj_matrix_full_label">proj_matrix</label>
+<textarea id="proj_matrix_full_textarea" rows="4" cols="30"></textarea>
+<label id="camera_matrix_full_label">camera_matrix</label>
+<textarea id="camera_matrix_full_textarea" rows="4" cols="30"></textarea>
+<label id="model_matrix_full_label">model_matrix</label>
+<textarea id="model_matrix_full_textarea" rows="4" cols="30"></textarea>
+
+<label id="local_position_label">local_position</label>
+<textarea id="local_position_textarea" rows="4" cols="30"></textarea>
+<label id="world_position_label">world_position</label>
+<textarea id="world_position_textarea" rows="4" cols="30"></textarea>
+<label id="view_position_label">view_position</label>
+<textarea id="view_position_textarea" rows="4" cols="30"></textarea>
+<label id="clip_position_label">clip_position</label>
+<textarea id="clip_position_textarea" rows="4" cols="30"></textarea>
+<label id="ndc_position_label">ndc_position</label>
+<textarea id="ndc_position_textarea" rows="4" cols="30"></textarea>
+<label id="vp_position_label">vp_position</label>
+<textarea id="vp_position_textarea" rows="4" cols="30"></textarea>
+<label id="fb_position_label">fb_position</label>
+<textarea id="fb_position_textarea" rows="4" cols="30"></textarea>
+
 <script id="vshader" type="x-shader/x-vertex">#version 300 es
 layout(location = 0)in vec3 n;
 layout(location = 1)in vec3 v;
@@ -104,13 +201,14 @@ var axisdata = [
 	    0.0,     0.0, -1000.0, 1.0, 0.5, 0.5,
 	    0.0,     0.0,  1000.0, 1.0, 0.5, 0.5
 ];
+//
 var vertexhandle;
 var vertexdata = [
 	//l
-	-1.0,-1.0,-1.0,-1.0, 0.0, 0.0, 0.5, 0.5, 1.0,
-	-1.0, 1.0,-1.0,-1.0, 0.0, 0.0, 0.5, 0.5, 1.0,
-	-1.0,-1.0, 1.0,-1.0, 0.0, 0.0, 0.5, 0.5, 1.0,
-	-1.0, 1.0, 1.0,-1.0, 0.0, 0.0, 0.5, 0.5, 1.0,
+	-1.0,-1.0,-1.0,-1.0, 0.0, 0.0, 0.8, 0.8, 1.0,
+	-1.0, 1.0,-1.0,-1.0, 0.0, 0.0, 0.8, 0.8, 1.0,
+	-1.0,-1.0, 1.0,-1.0, 0.0, 0.0, 0.8, 0.8, 1.0,
+	-1.0, 1.0, 1.0,-1.0, 0.0, 0.0, 0.8, 0.8, 1.0,
 
 	//r
 	 1.0,-1.0,-1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
@@ -119,10 +217,10 @@ var vertexdata = [
 	 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
 
 	//n
-	-1.0,-1.0,-1.0, 0.0,-1.0, 0.0, 0.5, 1.0, 0.5,
-	 1.0,-1.0,-1.0, 0.0,-1.0, 0.0, 0.5, 1.0, 0.5,
-	-1.0,-1.0, 1.0, 0.0,-1.0, 0.0, 0.5, 1.0, 0.5,
-	 1.0,-1.0, 1.0, 0.0,-1.0, 0.0, 0.5, 1.0, 0.5,
+	-1.0,-1.0,-1.0, 0.0,-1.0, 0.0, 0.8, 1.0, 0.8,
+	 1.0,-1.0,-1.0, 0.0,-1.0, 0.0, 0.8, 1.0, 0.8,
+	-1.0,-1.0, 1.0, 0.0,-1.0, 0.0, 0.8, 1.0, 0.8,
+	 1.0,-1.0, 1.0, 0.0,-1.0, 0.0, 0.8, 1.0, 0.8,
 
 	//f
 	-1.0, 1.0,-1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
@@ -131,10 +229,10 @@ var vertexdata = [
 	 1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
 
 	//b
-	-1.0,-1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.5, 0.5,
-	 1.0,-1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.5, 0.5,
-	-1.0, 1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.5, 0.5,
-	 1.0, 1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.5, 0.5,
+	-1.0,-1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.8, 0.8,
+	 1.0,-1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.8, 0.8,
+	-1.0, 1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.8, 0.8,
+	 1.0, 1.0,-1.0, 0.0, 0.0,-1.0, 1.0, 0.8, 0.8,
 
 	//t
 	-1.0,-1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
@@ -290,24 +388,32 @@ modelmatrix = new Float32Array([
 	0.0, 0.0, 1.0, 0.0,
 	0.0, 0.0, 0.0, 1.0
 ]);
+modelinverse = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 0.0, 1.0
+]);
 function setmodelmatrix(aa)
 {
 	var c = Math.cos(aa[3]*Math.PI/180/2);
 	var s = Math.sin(aa[3]*Math.PI/180/2);
-	model_quat = [aa[0]*s, aa[1]*s, aa[2]*s, c];
+	var invsqrt = 1.0 / Math.sqrt(aa[0]*aa[0] + aa[1]*aa[1] + aa[2]*aa[2]);
+	model_quat = [s*aa[0]*invsqrt, s*aa[1]*invsqrt, s*aa[2]*invsqrt, c];
 
+	//
 	modelmatrix[ 0] = 1.0 - (model_quat[1]*model_quat[1] + model_quat[2]*model_quat[2]) * 2.0;
-	modelmatrix[ 1] =       (model_quat[0]*model_quat[1] + model_quat[2]*model_quat[3]) * 2.0;
-	modelmatrix[ 2] =       (model_quat[0]*model_quat[2] - model_quat[1]*model_quat[3]) * 2.0;
+	modelmatrix[ 1] =       (model_quat[0]*model_quat[1] - model_quat[2]*model_quat[3]) * 2.0;
+	modelmatrix[ 2] =       (model_quat[0]*model_quat[2] + model_quat[1]*model_quat[3]) * 2.0;
 	modelmatrix[ 3] = 0.0;
 
-	modelmatrix[ 4] =       (model_quat[0]*model_quat[1] - model_quat[2]*model_quat[3]) * 2.0;
+	modelmatrix[ 4] =       (model_quat[0]*model_quat[1] + model_quat[2]*model_quat[3]) * 2.0;
 	modelmatrix[ 5] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[2]*model_quat[2]) * 2.0;
-	modelmatrix[ 6] =       (model_quat[1]*model_quat[2] + model_quat[0]*model_quat[3]) * 2.0;
+	modelmatrix[ 6] =       (model_quat[1]*model_quat[2] - model_quat[0]*model_quat[3]) * 2.0;
 	modelmatrix[ 7] = 0.0;
 
-	modelmatrix[ 8] =       (model_quat[0]*model_quat[2] + model_quat[1]*model_quat[3]) * 2.0;
-	modelmatrix[ 9] =       (model_quat[1]*model_quat[2] - model_quat[0]*model_quat[3]) * 2.0;
+	modelmatrix[ 8] =       (model_quat[0]*model_quat[2] - model_quat[1]*model_quat[3]) * 2.0;
+	modelmatrix[ 9] =       (model_quat[1]*model_quat[2] + model_quat[0]*model_quat[3]) * 2.0;
 	modelmatrix[10] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[1]*model_quat[1]) * 2.0;
 	modelmatrix[11] = 0.0;
 
@@ -315,38 +421,27 @@ function setmodelmatrix(aa)
 	modelmatrix[13] = 0.0;
 	modelmatrix[14] = 0.0;
 	modelmatrix[15] = 1.0;
-}
-var updated_model = 0;
-function updateui_model(aa)
-{
-	if(updated_model==1){
-		return;
-	}
-	updated_model=1
-
-	let str = '';
-	str += aa[0].toFixed(3) + ', ';
-	str += aa[1].toFixed(3) + ', ';
-	str += aa[2].toFixed(3) + ', ';
-	str += aa[3].toFixed(3);
-	document.getElementById('model_axisangle_textarea').value = str;
 
 	//
-	str = '';
-	str += model_quat[0].toFixed(3) + ', ';
-	str += model_quat[1].toFixed(3) + ', ';
-	str += model_quat[2].toFixed(3) + ', ';
-	str += model_quat[3].toFixed(3);
-	document.getElementById('model_quaternion_textarea').value = str;
+	modelinverse[ 0] = 1.0 - (model_quat[1]*model_quat[1] + model_quat[2]*model_quat[2]) * 2.0;
+	modelinverse[ 1] =       (model_quat[0]*model_quat[1] + model_quat[2]*model_quat[3]) * 2.0;
+	modelinverse[ 2] =       (model_quat[0]*model_quat[2] - model_quat[1]*model_quat[3]) * 2.0;
+	modelinverse[ 3] = 0.0;
 
-	//
-	str = '';
-	for(let j=0;j<16;j++){
-		if(modelmatrix[j] >= 0)str += ' ';
-		str += modelmatrix[j].toFixed(3);
-		str += ((j%4)==3) ? '\n' : ', ';
-	}
-	document.getElementById('model_matrix_textarea').value = str;
+	modelinverse[ 4] =       (model_quat[0]*model_quat[1] - model_quat[2]*model_quat[3]) * 2.0;
+	modelinverse[ 5] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[2]*model_quat[2]) * 2.0;
+	modelinverse[ 6] =       (model_quat[1]*model_quat[2] + model_quat[0]*model_quat[3]) * 2.0;
+	modelinverse[ 7] = 0.0;
+
+	modelinverse[ 8] =       (model_quat[0]*model_quat[2] + model_quat[1]*model_quat[3]) * 2.0;
+	modelinverse[ 9] =       (model_quat[1]*model_quat[2] - model_quat[0]*model_quat[3]) * 2.0;
+	modelinverse[10] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[1]*model_quat[1]) * 2.0;
+	modelinverse[11] = 0.0;
+
+	modelinverse[12] = 0.0;
+	modelinverse[13] = 0.0;
+	modelinverse[14] = 0.0;
+	modelinverse[15] = 1.0;
 }
 function setmatrix_model(type)
 {
@@ -358,12 +453,12 @@ function setmatrix_model(type)
 		setmodelmatrix(model_axan);
 		updateui_model(model_axan);
 	}
-	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), false, modelmatrix);
+	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), true, modelmatrix);
 }
 
 var camerax = 0.0;
 var cameray =-10.0;
-var cameraz = 10.0;
+var cameraz = 0.0;
 var centerx = 0.0;
 var centery = 0.0;
 var centerz = 0.0;
@@ -377,6 +472,12 @@ camera_quat = new Float32Array([
 	0.0, 0.0, 1.0, 0.0
 ]);
 viewmatrix = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0, 
+	0.0, 0.0, 0.0, 1.0
+]);
+camerainverse = new Float32Array([
 	1.0, 0.0, 0.0, 0.0,
 	0.0, 1.0, 0.0, 0.0,
 	0.0, 0.0, 1.0, 0.0, 
@@ -450,25 +551,46 @@ function setmatrix_view()
 
 
 	//matrix: X-above-far
-	viewmatrix[0] = ux;
-	viewmatrix[1] = vx;
-	viewmatrix[2] = -nx;
-	viewmatrix[3] = 0.0;
+	viewmatrix[ 0] = ux;
+	viewmatrix[ 1] = uy;
+	viewmatrix[ 2] = uz;
+	viewmatrix[ 3] = -camerax*ux - cameray*uy - cameraz*uz;
 
-	viewmatrix[4] = uy;
-	viewmatrix[5] = vy;
-	viewmatrix[6] = -ny;
-	viewmatrix[7] = 0.0;
+	viewmatrix[ 4] = vx;
+	viewmatrix[ 5] = vy;
+	viewmatrix[ 6] = vz;
+	viewmatrix[ 7] = -camerax*vx - cameray*vy - cameraz*vz;
 
-	viewmatrix[8] = uz;
-	viewmatrix[9] = vz;
-	viewmatrix[10] = -nz;
-	viewmatrix[11] = 0.0;
+	viewmatrix[ 8] = nx;
+	viewmatrix[ 9] = ny;
+	viewmatrix[10] = nz;
+	viewmatrix[11] = -camerax*nx - cameray*ny - cameraz*nz;
 
-	viewmatrix[12] = -camerax*ux - cameray*uy - cameraz*uz;
-	viewmatrix[13] = -camerax*vx - cameray*vy - cameraz*vz;
-	viewmatrix[14] = camerax*nx + cameray*ny + cameraz*nz;
+	viewmatrix[12] = 0.0;
+	viewmatrix[13] = 0.0;
+	viewmatrix[14] = 0.0;
 	viewmatrix[15] = 1.0;
+
+	//inverse: uvn -> rft
+	camerainverse[ 0] = ux;
+	camerainverse[ 1] = vx;
+	camerainverse[ 2] = nx;
+	camerainverse[ 3] = camerax;
+
+	camerainverse[ 4] = uy;
+	camerainverse[ 5] = vy;
+	camerainverse[ 6] = ny;
+	camerainverse[ 7] = cameray;
+
+	camerainverse[ 8] = uz;
+	camerainverse[ 9] = vz;
+	camerainverse[10] = nz;
+	camerainverse[11] = cameraz;
+
+	camerainverse[12] = 0.0;
+	camerainverse[13] = 0.0;
+	camerainverse[14] = 0.0;
+	camerainverse[15] = 1.0;
 
 }
 
@@ -478,115 +600,76 @@ projmatrix = new Float32Array([
 	0.0, 0.0, -1.0, -1.0,
 	0.0, 0.0, -0.2, 0.0
 ]);
+projinverse = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 1.0, 0.0
+]);
 function setprojmatrix()
 {
-	projmatrix[5] = windowwidth / windowheight;
-}
+	var l =-0.001;
+	var r = 0.001;
+	var b =-0.001 * windowheight / windowwidth;
+	var t = 0.001 * windowheight / windowwidth;
+	var n = 0.001;
+	var f = 1000000.0;
+	//logtoall("%f,%f,%f,%f,%f,%f\n",l,r,b,t,n,f);
 
-var updated_camera = 0;
-function updateui_camera()
+	projmatrix[ 0] = 2 * n / (r-l);
+	projmatrix[ 1] = 0.0;
+	projmatrix[ 2] = (r+l) / (l-r);
+	projmatrix[ 3] = 0.0;
+
+	projmatrix[ 4] = 0.0;
+	projmatrix[ 5] = 2 * n / (t-b);
+	projmatrix[ 6] = (t+b) / (b-t);
+	projmatrix[ 7] = 0.0;
+
+	projmatrix[ 8] = 0.0;
+	projmatrix[ 9] = 0.0;
+	projmatrix[10] = f / (f-n);
+	projmatrix[11] = f * n / (n-f);
+
+	projmatrix[12] = 0.0;
+	projmatrix[13] = 0.0;
+	projmatrix[14] = 1.0;
+	projmatrix[15] = 0.0;
+
+	projinverse[ 0] = 0.5 * (r-l) / n;
+	projinverse[ 1] = 0.0;
+	projinverse[ 2] = 0.0;
+	projinverse[ 3] = 0.5 * (r+l) / n;
+
+	projinverse[ 4] = 0.0;
+	projinverse[ 5] = 0.5 * (t-b) / n;
+	projinverse[ 6] = 0.0;
+	projinverse[ 7] = 0.5 * (t+b) / n;
+
+	projinverse[ 8] = 0.0;
+	projinverse[ 9] = 0.0;
+	projinverse[10] = 0.0;
+	projinverse[11] = 1.0;
+
+	projinverse[12] = 0.0;
+	projinverse[13] = 0.0;
+	projinverse[14] = (n-f) / n / f;
+	projinverse[15] = 1.0 / n;
+}
+function quaternion_rotatefrom(v, q)
 {
-	if(updated_camera==1){
-		return;
-	}
-	updated_camera=1
+	let t=[
+		(q[1]*v[2]-q[2]*v[1]) * 2,
+		(q[2]*v[0]-q[0]*v[2]) * 2,
+		(q[0]*v[1]-q[1]*v[0]) * 2];
 
-	let str = '';
-	str += camera_axan[0].toFixed(3) + ', ';
-	str += camera_axan[1].toFixed(3) + ', ';
-	str += camera_axan[2].toFixed(3) + ', ';
-	str += camera_axan[3].toFixed(3);
-	document.getElementById('camera_axisangle_textarea').value = str;
-
-	//
-	str = '';
-	str += camera_quat[0].toFixed(3) + ', ';
-	str += camera_quat[1].toFixed(3) + ', ';
-	str += camera_quat[2].toFixed(3) + ', ';
-	str += camera_quat[3].toFixed(3);
-	document.getElementById('camera_quaternion_textarea').value = str;
-
-	//
-	str = '';
-	for(let j=0;j<16;j++){
-		if(viewmatrix[j] >= 0)str += ' ';
-		str += viewmatrix[j].toFixed(3);
-		str += ((j%4)==3) ? '\n' : ', ';
-	}
-	document.getElementById('camera_matrix_textarea').value = str;
+	let o=[
+		v[0] + q[3]*t[0] + q[1]*t[2]-q[2]*t[1],
+		v[1] + q[3]*t[1] + q[2]*t[0]-q[0]*t[2],
+		v[2] + q[3]*t[2] + q[0]*t[1]-q[1]*t[0]];
+	return o;
 }
-function updateui_multiply(){
-	let vec = [1, 1, 1, 1];
-	let m_vec = [
-		modelmatrix[ 0]*vec[0] + modelmatrix[ 4]*vec[1] + modelmatrix[ 8]*vec[2] + modelmatrix[12]*vec[3],
-		modelmatrix[ 1]*vec[0] + modelmatrix[ 5]*vec[1] + modelmatrix[ 9]*vec[2] + modelmatrix[13]*vec[3],
-		modelmatrix[ 2]*vec[0] + modelmatrix[ 6]*vec[1] + modelmatrix[10]*vec[2] + modelmatrix[14]*vec[3],
-		modelmatrix[ 3]*vec[0] + modelmatrix[ 7]*vec[1] + modelmatrix[11]*vec[2] + modelmatrix[15]*vec[3]
-	];
-	let w_m_vec = [
-		viewmatrix[ 0]*m_vec[0] + viewmatrix[ 4]*m_vec[1] + viewmatrix[ 8]*m_vec[2] + viewmatrix[12]*m_vec[3],
-		viewmatrix[ 1]*m_vec[0] + viewmatrix[ 5]*m_vec[1] + viewmatrix[ 9]*m_vec[2] + viewmatrix[13]*m_vec[3],
-		viewmatrix[ 2]*m_vec[0] + viewmatrix[ 5]*m_vec[1] + viewmatrix[10]*m_vec[2] + viewmatrix[14]*m_vec[3],
-		viewmatrix[ 3]*m_vec[0] + viewmatrix[ 7]*m_vec[1] + viewmatrix[11]*m_vec[2] + viewmatrix[15]*m_vec[3]
-	];
-	let p_w_m_vec = [
-		projmatrix[ 0]*w_m_vec[0] + projmatrix[ 4]*w_m_vec[1] + projmatrix[ 8]*w_m_vec[2] + projmatrix[12]*w_m_vec[3],
-		projmatrix[ 1]*w_m_vec[0] + projmatrix[ 5]*w_m_vec[1] + projmatrix[ 9]*w_m_vec[2] + projmatrix[13]*w_m_vec[3],
-		projmatrix[ 2]*w_m_vec[0] + projmatrix[ 6]*w_m_vec[1] + projmatrix[10]*w_m_vec[2] + projmatrix[14]*w_m_vec[3],
-		projmatrix[ 3]*w_m_vec[0] + projmatrix[ 7]*w_m_vec[1] + projmatrix[11]*w_m_vec[2] + projmatrix[15]*w_m_vec[3]
-	];
-	let ndc = [p_w_m_vec[0]/p_w_m_vec[3], p_w_m_vec[1]/p_w_m_vec[3], p_w_m_vec[2]/p_w_m_vec[3], 1.0];
 
-	//
-	let str = '';
-	for(let j=0;j<16;j++){
-		if(projmatrix[j] >= 0)str += ' ';
-		str += projmatrix[j].toFixed(3);
-		str += ((j%4)==3) ? '\n' : ', ';
-	}
-	document.getElementById('proj_matrix_full_textarea').value = str;
-
-	//
-	str = '';
-	for(let j=0;j<16;j++){
-		if(viewmatrix[j] >= 0)str += ' ';
-		str += viewmatrix[j].toFixed(3);
-		str += ((j%4)==3) ? '\n' : ', ';
-	}
-	document.getElementById('camera_matrix_full_textarea').value = str;
-
-	//
-	str = '';
-	for(let j=0;j<16;j++){
-		if(modelmatrix[j] >= 0)str += ' ';
-		str += modelmatrix[j].toFixed(3);
-		str += ((j%4)==3) ? '\n' : ', ';
-	}
-	document.getElementById('model_matrix_full_textarea').value = str;
-
-	str = '';
-	str += vec[0].toFixed(3) + ', ';
-	str += vec[1].toFixed(3) + ', ';
-	str += vec[2].toFixed(3) + ', ';
-	str += vec[3].toFixed(3);
-	document.getElementById('local_position_textarea').value = str;
-
-	//
-	str = '';
-	str += p_w_m_vec[0].toFixed(3) + ', ';
-	str += p_w_m_vec[1].toFixed(3) + ', ';
-	str += p_w_m_vec[2].toFixed(3) + ', ';
-	str += p_w_m_vec[3].toFixed(3);
-	document.getElementById('clip_position_textarea').value = str;
-
-	//
-	str = '';
-	str += ndc[0].toFixed(3) + ', ';
-	str += ndc[1].toFixed(3) + ', ';
-	str += ndc[2].toFixed(3) + ', ';
-	str += ndc[3].toFixed(3);
-	document.getElementById('ndc_position_textarea').value = str;
-}
 function setcamera()
 {
 	var camxyz = new Float32Array([camerax, cameray, cameraz]);
@@ -594,8 +677,8 @@ function setcamera()
 
 	setmatrix_view();
 	setprojmatrix();
-	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "view"), false, viewmatrix);
-	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "proj"), false, projmatrix);
+	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "view"), true, viewmatrix);
+	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "proj"), true, projmatrix);
 }
 
 function setlight()
@@ -672,7 +755,8 @@ function drawScene()
 		gl.drawArrays(gl.TRIANGLES, 0, stlpointcount*3);
 	}
 
-	updateui_multiply();
+	updateui_local2fb();
+	updateui_fb2local();
 }
 
 function birth()
@@ -681,16 +765,16 @@ function birth()
 	initwebgl();
 	initshaders();
 
+	//axis
 	axishandle = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, axishandle);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(axisdata), gl.STATIC_DRAW);
 
-	//
+	//cube
 	vertexhandle = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexhandle);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexdata), gl.STATIC_DRAW);
 
-	//
 	indexhandle = gl.createBuffer();
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexhandle);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(indexdata), gl.STATIC_DRAW);
@@ -887,39 +971,300 @@ function camera_aa_keydown(ev)
 		updated_model = 0;
 	}
 }
+
+var updated_model = 0;
+function updateui_model(aa)
+{
+	if(updated_model==1){
+		return;
+	}
+	updated_model=1
+
+	let str = '';
+	str += aa[0].toFixed(3) + ', ';
+	str += aa[1].toFixed(3) + ', ';
+	str += aa[2].toFixed(3) + ', ';
+	str += aa[3].toFixed(3);
+	document.getElementById('model_axisangle_textarea').value = str;
+
+	//
+	str = '';
+	str += model_quat[0].toFixed(3) + ', ';
+	str += model_quat[1].toFixed(3) + ', ';
+	str += model_quat[2].toFixed(3) + ', ';
+	str += model_quat[3].toFixed(3);
+	document.getElementById('model_quaternion_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(modelmatrix[j] >= 0)str += ' ';
+		str += modelmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('model_matrix_textarea').value = str;
+}
+
+var updated_camera = 0;
+function updateui_camera()
+{
+	if(updated_camera==1){
+		return;
+	}
+	updated_camera=1
+
+	let str = '';
+	str += camerax.toFixed(3) + ', ';
+	str += cameray.toFixed(3) + ', ';
+	str += cameraz.toFixed(3);
+	document.getElementById('camera_position_textarea').value = str;
+
+	str = '';
+	str += camera_axan[0].toFixed(3) + ', ';
+	str += camera_axan[1].toFixed(3) + ', ';
+	str += camera_axan[2].toFixed(3) + ', ';
+	str += camera_axan[3].toFixed(3);
+	document.getElementById('camera_axisangle_textarea').value = str;
+
+	//
+	str = '';
+	str += camera_quat[0].toFixed(3) + ', ';
+	str += camera_quat[1].toFixed(3) + ', ';
+	str += camera_quat[2].toFixed(3) + ', ';
+	str += camera_quat[3].toFixed(3);
+	document.getElementById('camera_quaternion_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(viewmatrix[j] >= 0)str += ' ';
+		str += viewmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('camera_matrix_textarea').value = str;
+}
+
+fbxy = new Float32Array([
+	0.0, 0.0, 1.0, 20.0
+]);
+function updateui_local2fb(){
+	let vec = [1, 1, 1, 1];
+	//let tmp = quaternion_rotatefrom(vec, model_quat);
+	//console.log(tmp);
+
+	let w_vec = [
+		modelmatrix[ 0]*vec[0] + modelmatrix[ 1]*vec[1] + modelmatrix[ 2]*vec[2] + modelmatrix[ 3]*vec[3],
+		modelmatrix[ 4]*vec[0] + modelmatrix[ 5]*vec[1] + modelmatrix[ 6]*vec[2] + modelmatrix[ 7]*vec[3],
+		modelmatrix[ 8]*vec[0] + modelmatrix[ 9]*vec[1] + modelmatrix[10]*vec[2] + modelmatrix[11]*vec[3],
+		modelmatrix[12]*vec[0] + modelmatrix[13]*vec[1] + modelmatrix[14]*vec[2] + modelmatrix[15]*vec[3]
+	];
+
+	let v_w_vec = [
+		viewmatrix[ 0]*w_vec[0] + viewmatrix[ 1]*w_vec[1] + viewmatrix[ 2]*w_vec[2] + viewmatrix[ 3]*w_vec[3],
+		viewmatrix[ 4]*w_vec[0] + viewmatrix[ 5]*w_vec[1] + viewmatrix[ 6]*w_vec[2] + viewmatrix[ 7]*w_vec[3],
+		viewmatrix[ 8]*w_vec[0] + viewmatrix[ 9]*w_vec[1] + viewmatrix[10]*w_vec[2] + viewmatrix[11]*w_vec[3],
+		viewmatrix[12]*w_vec[0] + viewmatrix[13]*w_vec[1] + viewmatrix[14]*w_vec[2] + viewmatrix[15]*w_vec[3]
+	];
+/*	let v_w_vec = [
+		viewmatrix[ 0]*w_vec[0] + viewmatrix[ 4]*w_vec[1] + viewmatrix[ 8]*w_vec[2] + viewmatrix[12]*w_vec[3],
+		viewmatrix[ 1]*w_vec[0] + viewmatrix[ 5]*w_vec[1] + viewmatrix[ 9]*w_vec[2] + viewmatrix[13]*w_vec[3],
+		viewmatrix[ 2]*w_vec[0] + viewmatrix[ 5]*w_vec[1] + viewmatrix[10]*w_vec[2] + viewmatrix[14]*w_vec[3],
+		viewmatrix[ 3]*w_vec[0] + viewmatrix[ 7]*w_vec[1] + viewmatrix[11]*w_vec[2] + viewmatrix[15]*w_vec[3]
+	];*/
+
+	let p_v_w_vec = [
+		projmatrix[ 0]*v_w_vec[0] + projmatrix[ 1]*v_w_vec[1] + projmatrix[ 2]*v_w_vec[2] + projmatrix[ 3]*v_w_vec[3],
+		projmatrix[ 4]*v_w_vec[0] + projmatrix[ 5]*v_w_vec[1] + projmatrix[ 6]*v_w_vec[2] + projmatrix[ 7]*v_w_vec[3],
+		projmatrix[ 8]*v_w_vec[0] + projmatrix[ 9]*v_w_vec[1] + projmatrix[10]*v_w_vec[2] + projmatrix[11]*v_w_vec[3],
+		projmatrix[12]*v_w_vec[0] + projmatrix[13]*v_w_vec[1] + projmatrix[14]*v_w_vec[2] + projmatrix[15]*v_w_vec[3]
+	];
+/*
+	let p_v_w_vec = [
+		projmatrix[ 0]*v_w_vec[0] + projmatrix[ 4]*v_w_vec[1] + projmatrix[ 8]*v_w_vec[2] + projmatrix[12]*v_w_vec[3],
+		projmatrix[ 1]*v_w_vec[0] + projmatrix[ 5]*v_w_vec[1] + projmatrix[ 9]*v_w_vec[2] + projmatrix[13]*v_w_vec[3],
+		projmatrix[ 2]*v_w_vec[0] + projmatrix[ 6]*v_w_vec[1] + projmatrix[10]*v_w_vec[2] + projmatrix[14]*v_w_vec[3],
+		projmatrix[ 3]*v_w_vec[0] + projmatrix[ 7]*v_w_vec[1] + projmatrix[11]*v_w_vec[2] + projmatrix[15]*v_w_vec[3]
+	];
+*/
+	let ndc = [p_v_w_vec[0]/p_v_w_vec[3], p_v_w_vec[1]/p_v_w_vec[3], p_v_w_vec[2]/p_v_w_vec[3], 1.0];
+	let vpxy = [(ndc[0]+1)/2, 1-(ndc[1]+1)/2, ndc[2], ndc[3]];
+	fbxy = [windowwidth*vpxy[0], windowheight*vpxy[1], ndc[2], 1];
+
+	//
+	let str = '';
+	for(let j=0;j<16;j++){
+		if(projmatrix[j] >= 0)str += ' ';
+		str += projmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('proj_matrix_full_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(viewmatrix[j] >= 0)str += ' ';
+		str += viewmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('camera_matrix_full_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(modelmatrix[j] >= 0)str += ' ';
+		str += modelmatrix[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('model_matrix_full_textarea').value = str;
+
+	//
+	str = '';
+	str += vec[0].toFixed(3) + '\n';
+	str += vec[1].toFixed(3) + '\n';
+	str += vec[2].toFixed(3) + '\n';
+	str += vec[3].toFixed(3);
+	document.getElementById('local_position_textarea').value = str;
+
+	//
+	str = '';
+	str += w_vec[0].toFixed(3) + '\n';
+	str += w_vec[1].toFixed(3) + '\n';
+	str += w_vec[2].toFixed(3) + '\n';
+	str += w_vec[3].toFixed(3);
+	document.getElementById('world_position_textarea').value = str;
+
+	//
+	str = '';
+	str += v_w_vec[0].toFixed(3) + '\n';
+	str += v_w_vec[1].toFixed(3) + '\n';
+	str += v_w_vec[2].toFixed(3) + '\n';
+	str += v_w_vec[3].toFixed(3);
+	document.getElementById('view_position_textarea').value = str;
+
+	//
+	str = '';
+	str += p_v_w_vec[0].toFixed(3) + '\n';
+	str += p_v_w_vec[1].toFixed(3) + '\n';
+	str += p_v_w_vec[2].toFixed(3) + '\n';
+	str += p_v_w_vec[3].toFixed(3);
+	document.getElementById('clip_position_textarea').value = str;
+
+	//
+	str = '';
+	str += ndc[0].toFixed(3) + '\n';
+	str += ndc[1].toFixed(3) + '\n';
+	str += ndc[2].toFixed(3) + '\n';
+	str += ndc[3].toFixed(3);
+	document.getElementById('ndc_position_textarea').value = str;
+
+	str = '';
+	str += vpxy[0].toFixed(3) + '\n';
+	str += vpxy[1].toFixed(3) + '\n';
+	str += vpxy[2].toFixed(3) + '\n';
+	str += vpxy[3].toFixed(3);
+	document.getElementById('vp_position_textarea').value = str;
+
+	//
+	str = '';
+	str += fbxy[0].toFixed(3) + '\n';
+	str += fbxy[1].toFixed(3) + '\n';
+	str += fbxy[2].toFixed(3) + '\n';
+	str += fbxy[3].toFixed(3);
+	document.getElementById('fb_position_textarea').value = str;
+}
+function updateui_fb2local(){
+	let vpxy = [fbxy[0]/windowwidth, fbxy[1]/windowheight, fbxy[2], fbxy[3]];
+	let ndc = [vpxy[0]*2-1, 1-vpxy[1]*2, vpxy[2], vpxy[3]];
+
+	let view = [
+		projinverse[ 0]*ndc[0] + projinverse[ 1]*ndc[1] + projinverse[ 2]*ndc[2] + projinverse[ 3]*ndc[3],
+		projinverse[ 4]*ndc[0] + projinverse[ 5]*ndc[1] + projinverse[ 6]*ndc[2] + projinverse[ 7]*ndc[3],
+		projinverse[ 8]*ndc[0] + projinverse[ 9]*ndc[1] + projinverse[10]*ndc[2] + projinverse[11]*ndc[3],
+		projinverse[12]*ndc[0] + projinverse[13]*ndc[1] + projinverse[14]*ndc[2] + projinverse[15]*ndc[3]
+	];
+	view = [view[0]/view[3], view[1]/view[3], view[2]/view[3], 1];
+
+	let world = [
+		camerainverse[ 0]*view[0] + camerainverse[ 1]*view[1] + camerainverse[ 2]*view[2] + camerainverse[ 3]*view[3],
+		camerainverse[ 4]*view[0] + camerainverse[ 5]*view[1] + camerainverse[ 6]*view[2] + camerainverse[ 7]*view[3],
+		camerainverse[ 8]*view[0] + camerainverse[ 9]*view[1] + camerainverse[10]*view[2] + camerainverse[11]*view[3],
+		camerainverse[12]*view[0] + camerainverse[13]*view[1] + camerainverse[14]*view[2] + camerainverse[15]*view[3]
+	];
+
+	let local = [
+		modelinverse[ 0]*world[0] + modelinverse[ 1]*world[1] + modelinverse[ 2]*world[2] + modelinverse[ 3]*world[3],
+		modelinverse[ 4]*world[0] + modelinverse[ 5]*world[1] + modelinverse[ 6]*world[2] + modelinverse[ 7]*world[3],
+		modelinverse[ 8]*world[0] + modelinverse[ 9]*world[1] + modelinverse[10]*world[2] + modelinverse[11]*world[3],
+		modelinverse[12]*world[0] + modelinverse[13]*world[1] + modelinverse[14]*world[2] + modelinverse[15]*world[3]
+	];
+
+	str = '';
+	str += vpxy[0].toFixed(3) + '\n';
+	str += vpxy[1].toFixed(3) + '\n';
+	str += vpxy[2].toFixed(3) + '\n';
+	str += vpxy[3].toFixed(3);
+	document.getElementById('vp_inverse_textarea').value = str;
+
+	//
+	str = '';
+	str += ndc[0].toFixed(3) + '\n';
+	str += ndc[1].toFixed(3) + '\n';
+	str += ndc[2].toFixed(3) + '\n';
+	str += ndc[3].toFixed(3);
+	document.getElementById('ndc_inverse_textarea').value = str;
+
+	str = 'same as ndc';
+	document.getElementById('clip_inverse_textarea').value = str;
+
+	str = '';
+	str += view[0].toFixed(3) + '\n';
+	str += view[1].toFixed(3) + '\n';
+	str += view[2].toFixed(3) + '\n';
+	str += view[3].toFixed(3);
+	document.getElementById('view_inverse_textarea').value = str;
+
+	str = '';
+	str += world[0].toFixed(3) + '\n';
+	str += world[1].toFixed(3) + '\n';
+	str += world[2].toFixed(3) + '\n';
+	str += world[3].toFixed(3);
+	document.getElementById('world_inverse_textarea').value = str;
+
+	str = '';
+	str += local[0].toFixed(3) + '\n';
+	str += local[1].toFixed(3) + '\n';
+	str += local[2].toFixed(3) + '\n';
+	str += local[3].toFixed(3);
+	document.getElementById('local_inverse_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(projinverse[j] >= 0)str += ' ';
+		str += projinverse[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('proj_inverse_full_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(camerainverse[j] >= 0)str += ' ';
+		str += camerainverse[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('camera_inverse_full_textarea').value = str;
+
+	//
+	str = '';
+	for(let j=0;j<16;j++){
+		if(modelinverse[j] >= 0)str += ' ';
+		str += modelinverse[j].toFixed(3);
+		str += ((j%4)==3) ? '\n' : ', ';
+	}
+	document.getElementById('model_inverse_full_textarea').value = str;
+}
 </script>
-</head>
 
-<body onload="birth()" onresize="resize()">
-	<canvas id="canvas" ondragover="allowDrop(event)" ondrop="dropfile(event)" onkeydown="keydown(event)" onmousewheel="mousewheel(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
-	</canvas>
-
-	<label id="model_axisangle_label">model_axisangle</label>
-	<textarea id="model_axisangle_textarea" rows="1" cols="30" onkeydown="model_aa_keydown(event)"></textarea>
-	<label id="model_quaternion_label">model_quaternion</label>
-	<textarea id="model_quaternion_textarea" rows="1" cols="30"></textarea>
-	<label id="model_matrix_label">model_matrix_rotate</label>
-	<textarea id="model_matrix_textarea" rows="5" cols="30"></textarea>
-
-	<label id="camera_axisangle_label">camera_axisangle</label>
-	<textarea id="camera_axisangle_textarea" rows="1" cols="30" onkeydown="camera_aa_keydown(event)"></textarea>
-	<label id="camera_quaternion_label">camera_quaternion</label>
-	<textarea id="camera_quaternion_textarea" rows="1" cols="30"></textarea>
-	<label id="camera_matrix_label">camera_matrix_rotate</label>
-	<textarea id="camera_matrix_textarea" rows="5" cols="30"></textarea>
-
-	<label id="proj_matrix_full_label">proj_matrix</label>
-	<textarea id="proj_matrix_full_textarea" rows="5" cols="30"></textarea>
-	<label id="camera_matrix_full_label">camera_matrix</label>
-	<textarea id="camera_matrix_full_textarea" rows="5" cols="30"></textarea>
-	<label id="model_matrix_full_label">model_matrix</label>
-	<textarea id="model_matrix_full_textarea" rows="5" cols="30"></textarea>
-	<label id="local_position_label">local_position</label>
-	<textarea id="local_position_textarea" rows="1" cols="30"></textarea>
-	<label id="clip_position_label">clip_position</label>
-	<textarea id="clip_position_textarea" rows="1" cols="30"></textarea>
-	<label id="ndc_position_label">ndc_position</label>
-	<textarea id="ndc_position_textarea" rows="1" cols="30"></textarea>
 </body>
-
 </html>
