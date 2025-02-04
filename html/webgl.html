@@ -6,12 +6,14 @@
 <style>
 	html,body{margin:0;padding:0;overflow:hidden;height:100%;}
 	label,textarea{position:absolute;z-index:10;transform:translateX(-50%);}
-	#model_axisangle_label{      position:absolute;left:10%;width:20%;top: 0px;color:white;}
-	#model_axisangle_textarea{   position:absolute;left:10%;width:20%;top:20px;}
-	#model_quaternion_label{     position:absolute;left:10%;width:20%;top:40px;color:white;}
-	#model_quaternion_textarea{  position:absolute;left:10%;width:20%;top:60px;}
-	#model_matrix_label {        position:absolute;left:10%;width:20%;top:80px;color:white;}
-	#model_matrix_textarea {     position:absolute;left:10%;width:20%;top:100px;}
+	#model_position_label{        position:absolute;left:10%;width:20%;top:  0px;color:white;}
+	#model_position_textarea{     position:absolute;left:10%;width:20%;top: 20px;}
+	#model_axisangle_label{       position:absolute;left:10%;width:20%;top: 40px;color:white;}
+	#model_axisangle_textarea{    position:absolute;left:10%;width:20%;top: 60px;}
+	#model_quaternion_label{      position:absolute;left:10%;width:20%;top: 80px;color:white;}
+	#model_quaternion_textarea{   position:absolute;left:10%;width:20%;top:100px;}
+	#model_rotatematrix_label {   position:absolute;left:10%;width:20%;top:120px;color:white;}
+	#model_rotatematrix_textarea {position:absolute;left:10%;width:20%;top:140px;}
 
 	#camera_position_label{      position:absolute;left:90%;width:20%;top:  0px;color:white;}
 	#camera_position_textarea{   position:absolute;left:90%;width:20%;top: 20px;}
@@ -71,15 +73,17 @@
 <canvas id="canvas" ondragover="allowDrop(event)" ondrop="dropfile(event)" onkeydown="keydown(event)" onmousewheel="mousewheel(event)" onmousedown="mousedown(event)" onmouseup="mouseup(event)" onmousemove="mousemove(event)"  ontouchstart="mousedown(event)" ontouchend="mouseup(event)" ontouchmove="touchmove(event)">
 </canvas>
 
+<label id="model_position_label">model_position</label>
+<textarea id="model_position_textarea" rows="1" cols="30" onkeydown="model_pos_keydown(event)"></textarea>
 <label id="model_axisangle_label">model_axisangle</label>
 <textarea id="model_axisangle_textarea" rows="1" cols="30" onkeydown="model_aa_keydown(event)"></textarea>
 <label id="model_quaternion_label">model_quaternion</label>
 <textarea id="model_quaternion_textarea" rows="1" cols="30"></textarea>
-<label id="model_matrix_label">model_matrix_rotate</label>
-<textarea id="model_matrix_textarea" rows="5" cols="30"></textarea>
+<label id="model_rotatematrix_label">model_matrix_rotate</label>
+<textarea id="model_rotatematrix_textarea" rows="5" cols="30"></textarea>
 
 <label id="camera_position_label">camera_position</label>
-<textarea id="camera_position_textarea" rows="1" cols="30"></textarea>
+<textarea id="camera_position_textarea" rows="1" cols="30" onkeydown="camera_pos_keydown(event)"></textarea>
 <label id="camera_axisangle_label">camera_axisangle</label>
 <textarea id="camera_axisangle_textarea" rows="1" cols="30" onkeydown="camera_aa_keydown(event)"></textarea>
 <label id="camera_quaternion_label">camera_quaternion</label>
@@ -115,9 +119,9 @@
 <textarea id="model_matrix_full_textarea" rows="4" cols="30"></textarea>
 
 <label id="local_position_label">local_position</label>
-<textarea id="local_position_textarea" rows="4" cols="30"></textarea>
+<textarea id="local_position_textarea" rows="4" cols="30" onkeydown="local_pos_keydown(event)"></textarea>
 <label id="world_position_label">world_position</label>
-<textarea id="world_position_textarea" rows="4" cols="30"></textarea>
+<textarea id="world_position_textarea" rows="4" cols="30" onkeydown="world_pos_keydown(event)"></textarea>
 <label id="view_position_label">view_position</label>
 <textarea id="view_position_textarea" rows="4" cols="30"></textarea>
 <label id="clip_position_label">clip_position</label>
@@ -376,11 +380,38 @@ function initshaders() {
 	colorobject = gl.getAttribLocation(shaderProgram, "c");
 }
 
+model_tran = new Float32Array([
+	1.0, 0.0, 0.0, 1.0
+]);
 model_axan = new Float32Array([
 	0.0, 0.0, 1.0, 20.0
 ]);
 model_quat = new Float32Array([
 	0.0, 0.0, 1.0, 0.0
+]);
+modeltranslatematrix = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 0.0, 1.0
+]);
+modeltranslateinverse = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 0.0, 1.0
+]);
+modelrotatematrix = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 0.0, 1.0
+]);
+modelrotateinverse = new Float32Array([
+	1.0, 0.0, 0.0, 0.0,
+	0.0, 1.0, 0.0, 0.0,
+	0.0, 0.0, 1.0, 0.0,
+	0.0, 0.0, 0.0, 1.0
 ]);
 modelmatrix = new Float32Array([
 	1.0, 0.0, 0.0, 0.0,
@@ -394,7 +425,7 @@ modelinverse = new Float32Array([
 	0.0, 0.0, 1.0, 0.0,
 	0.0, 0.0, 0.0, 1.0
 ]);
-function setmodelmatrix(aa)
+function setmodelmatrix_rotate(aa)
 {
 	var c = Math.cos(aa[3]*Math.PI/180/2);
 	var s = Math.sin(aa[3]*Math.PI/180/2);
@@ -402,58 +433,119 @@ function setmodelmatrix(aa)
 	model_quat = [s*aa[0]*invsqrt, s*aa[1]*invsqrt, s*aa[2]*invsqrt, c];
 
 	//
-	modelmatrix[ 0] = 1.0 - (model_quat[1]*model_quat[1] + model_quat[2]*model_quat[2]) * 2.0;
-	modelmatrix[ 1] =       (model_quat[0]*model_quat[1] - model_quat[2]*model_quat[3]) * 2.0;
-	modelmatrix[ 2] =       (model_quat[0]*model_quat[2] + model_quat[1]*model_quat[3]) * 2.0;
-	modelmatrix[ 3] = 0.0;
+	modelrotatematrix[ 0] = 1.0 - (model_quat[1]*model_quat[1] + model_quat[2]*model_quat[2]) * 2.0;
+	modelrotatematrix[ 1] =       (model_quat[0]*model_quat[1] - model_quat[2]*model_quat[3]) * 2.0;
+	modelrotatematrix[ 2] =       (model_quat[0]*model_quat[2] + model_quat[1]*model_quat[3]) * 2.0;
+	modelrotatematrix[ 3] = 0.0;
 
-	modelmatrix[ 4] =       (model_quat[0]*model_quat[1] + model_quat[2]*model_quat[3]) * 2.0;
-	modelmatrix[ 5] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[2]*model_quat[2]) * 2.0;
-	modelmatrix[ 6] =       (model_quat[1]*model_quat[2] - model_quat[0]*model_quat[3]) * 2.0;
-	modelmatrix[ 7] = 0.0;
+	modelrotatematrix[ 4] =       (model_quat[0]*model_quat[1] + model_quat[2]*model_quat[3]) * 2.0;
+	modelrotatematrix[ 5] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[2]*model_quat[2]) * 2.0;
+	modelrotatematrix[ 6] =       (model_quat[1]*model_quat[2] - model_quat[0]*model_quat[3]) * 2.0;
+	modelrotatematrix[ 7] = 0.0;
 
-	modelmatrix[ 8] =       (model_quat[0]*model_quat[2] - model_quat[1]*model_quat[3]) * 2.0;
-	modelmatrix[ 9] =       (model_quat[1]*model_quat[2] + model_quat[0]*model_quat[3]) * 2.0;
-	modelmatrix[10] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[1]*model_quat[1]) * 2.0;
-	modelmatrix[11] = 0.0;
+	modelrotatematrix[ 8] =       (model_quat[0]*model_quat[2] - model_quat[1]*model_quat[3]) * 2.0;
+	modelrotatematrix[ 9] =       (model_quat[1]*model_quat[2] + model_quat[0]*model_quat[3]) * 2.0;
+	modelrotatematrix[10] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[1]*model_quat[1]) * 2.0;
+	modelrotatematrix[11] = 0.0;
 
-	modelmatrix[12] = 0.0;
-	modelmatrix[13] = 0.0;
-	modelmatrix[14] = 0.0;
-	modelmatrix[15] = 1.0;
+	modelrotatematrix[12] = 0.0;
+	modelrotatematrix[13] = 0.0;
+	modelrotatematrix[14] = 0.0;
+	modelrotatematrix[15] = 1.0;
 
 	//
-	modelinverse[ 0] = 1.0 - (model_quat[1]*model_quat[1] + model_quat[2]*model_quat[2]) * 2.0;
-	modelinverse[ 1] =       (model_quat[0]*model_quat[1] + model_quat[2]*model_quat[3]) * 2.0;
-	modelinverse[ 2] =       (model_quat[0]*model_quat[2] - model_quat[1]*model_quat[3]) * 2.0;
-	modelinverse[ 3] = 0.0;
+	modelrotateinverse[ 0] = 1.0 - (model_quat[1]*model_quat[1] + model_quat[2]*model_quat[2]) * 2.0;
+	modelrotateinverse[ 1] =       (model_quat[0]*model_quat[1] + model_quat[2]*model_quat[3]) * 2.0;
+	modelrotateinverse[ 2] =       (model_quat[0]*model_quat[2] - model_quat[1]*model_quat[3]) * 2.0;
+	modelrotateinverse[ 3] = 0.0;
 
-	modelinverse[ 4] =       (model_quat[0]*model_quat[1] - model_quat[2]*model_quat[3]) * 2.0;
-	modelinverse[ 5] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[2]*model_quat[2]) * 2.0;
-	modelinverse[ 6] =       (model_quat[1]*model_quat[2] + model_quat[0]*model_quat[3]) * 2.0;
-	modelinverse[ 7] = 0.0;
+	modelrotateinverse[ 4] =       (model_quat[0]*model_quat[1] - model_quat[2]*model_quat[3]) * 2.0;
+	modelrotateinverse[ 5] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[2]*model_quat[2]) * 2.0;
+	modelrotateinverse[ 6] =       (model_quat[1]*model_quat[2] + model_quat[0]*model_quat[3]) * 2.0;
+	modelrotateinverse[ 7] = 0.0;
 
-	modelinverse[ 8] =       (model_quat[0]*model_quat[2] + model_quat[1]*model_quat[3]) * 2.0;
-	modelinverse[ 9] =       (model_quat[1]*model_quat[2] - model_quat[0]*model_quat[3]) * 2.0;
-	modelinverse[10] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[1]*model_quat[1]) * 2.0;
-	modelinverse[11] = 0.0;
+	modelrotateinverse[ 8] =       (model_quat[0]*model_quat[2] + model_quat[1]*model_quat[3]) * 2.0;
+	modelrotateinverse[ 9] =       (model_quat[1]*model_quat[2] - model_quat[0]*model_quat[3]) * 2.0;
+	modelrotateinverse[10] = 1.0 - (model_quat[0]*model_quat[0] + model_quat[1]*model_quat[1]) * 2.0;
+	modelrotateinverse[11] = 0.0;
 
-	modelinverse[12] = 0.0;
-	modelinverse[13] = 0.0;
-	modelinverse[14] = 0.0;
-	modelinverse[15] = 1.0;
+	modelrotateinverse[12] = 0.0;
+	modelrotateinverse[13] = 0.0;
+	modelrotateinverse[14] = 0.0;
+	modelrotateinverse[15] = 1.0;
+}
+function setmodelmatrix_translate()
+{
+	modeltranslatematrix[ 3] = model_tran[0];
+	modeltranslatematrix[ 7] = model_tran[1];
+	modeltranslatematrix[11] = model_tran[2];
+
+	modeltranslateinverse[ 3] = -model_tran[0];
+	modeltranslateinverse[ 7] = -model_tran[1];
+	modeltranslateinverse[11] = -model_tran[2];
+}
+function setmodelmatrix_aaaa(t, r)
+{
+	modelmatrix[ 0] = t[ 0]*r[ 0] + t[ 1]*r[ 4] + t[ 2]*r[ 8] + t[ 3]*r[12];
+	modelmatrix[ 1] = t[ 0]*r[ 1] + t[ 1]*r[ 5] + t[ 2]*r[ 9] + t[ 3]*r[13];
+	modelmatrix[ 2] = t[ 0]*r[ 2] + t[ 1]*r[ 6] + t[ 2]*r[10] + t[ 3]*r[14];
+	modelmatrix[ 3] = t[ 0]*r[ 3] + t[ 1]*r[ 7] + t[ 2]*r[11] + t[ 3]*r[15];
+
+	modelmatrix[ 4] = t[ 4]*r[ 0] + t[ 5]*r[ 4] + t[ 6]*r[ 8] + t[ 7]*r[12];
+	modelmatrix[ 5] = t[ 4]*r[ 1] + t[ 5]*r[ 5] + t[ 6]*r[ 9] + t[ 7]*r[13];
+	modelmatrix[ 6] = t[ 4]*r[ 2] + t[ 5]*r[ 6] + t[ 6]*r[10] + t[ 7]*r[14];
+	modelmatrix[ 7] = t[ 4]*r[ 3] + t[ 5]*r[ 7] + t[ 6]*r[11] + t[ 7]*r[15];
+
+	modelmatrix[ 8] = t[ 8]*r[ 0] + t[ 9]*r[ 4] + t[10]*r[ 8] + t[11]*r[12];
+	modelmatrix[ 9] = t[ 8]*r[ 1] + t[ 9]*r[ 5] + t[10]*r[ 9] + t[11]*r[13];
+	modelmatrix[10] = t[ 8]*r[ 2] + t[ 9]*r[ 6] + t[10]*r[10] + t[11]*r[14];
+	modelmatrix[11] = t[ 8]*r[ 3] + t[ 9]*r[ 7] + t[10]*r[11] + t[11]*r[15];
+
+	modelmatrix[12] = t[12]*r[ 0] + t[13]*r[ 4] + t[14]*r[ 8] + t[15]*r[12];
+	modelmatrix[13] = t[12]*r[ 1] + t[13]*r[ 5] + t[14]*r[ 9] + t[15]*r[13];
+	modelmatrix[14] = t[12]*r[ 2] + t[13]*r[ 6] + t[14]*r[10] + t[15]*r[14];
+	modelmatrix[15] = t[12]*r[ 3] + t[13]*r[ 7] + t[14]*r[11] + t[15]*r[15];
+}
+function setmodelmatrix_bbbb(t, r)
+{
+	modelinverse[ 0] = r[ 0]*t[ 0] + r[ 1]*t[ 4] + r[ 2]*t[ 8] + r[ 3]*t[12];
+	modelinverse[ 1] = r[ 0]*t[ 1] + r[ 1]*t[ 5] + r[ 2]*t[ 9] + r[ 3]*t[13];
+	modelinverse[ 2] = r[ 0]*t[ 2] + r[ 1]*t[ 6] + r[ 2]*t[10] + r[ 3]*t[14];
+	modelinverse[ 3] = r[ 0]*t[ 3] + r[ 1]*t[ 7] + r[ 2]*t[11] + r[ 3]*t[15];
+
+	modelinverse[ 4] = r[ 4]*t[ 0] + r[ 5]*t[ 4] + r[ 6]*t[ 8] + r[ 7]*t[12];
+	modelinverse[ 5] = r[ 4]*t[ 1] + r[ 5]*t[ 5] + r[ 6]*t[ 9] + r[ 7]*t[13];
+	modelinverse[ 6] = r[ 4]*t[ 2] + r[ 5]*t[ 6] + r[ 6]*t[10] + r[ 7]*t[14];
+	modelinverse[ 7] = r[ 4]*t[ 3] + r[ 5]*t[ 7] + r[ 6]*t[11] + r[ 7]*t[15];
+
+	modelinverse[ 8] = r[ 8]*t[ 0] + r[ 9]*t[ 4] + r[10]*t[ 8] + r[11]*t[12];
+	modelinverse[ 9] = r[ 8]*t[ 1] + r[ 9]*t[ 5] + r[10]*t[ 9] + r[11]*t[13];
+	modelinverse[10] = r[ 8]*t[ 2] + r[ 9]*t[ 6] + r[10]*t[10] + r[11]*t[14];
+	modelinverse[11] = r[ 8]*t[ 3] + r[ 9]*t[ 7] + r[10]*t[11] + r[11]*t[15];
+
+	modelinverse[12] = r[12]*t[ 0] + r[13]*t[ 4] + r[14]*t[ 8] + r[15]*t[12];
+	modelinverse[13] = r[12]*t[ 1] + r[13]*t[ 5] + r[14]*t[ 9] + r[15]*t[13];
+	modelinverse[14] = r[12]*t[ 2] + r[13]*t[ 6] + r[14]*t[10] + r[15]*t[14];
+	modelinverse[15] = r[12]*t[ 3] + r[13]*t[ 7] + r[14]*t[11] + r[15]*t[15];
 }
 function setmatrix_model(type)
 {
 	if(type == 0){
-		var aa = [0,0,1, 0];
-		setmodelmatrix(aa);
+		modelmatrix[ 1] = modelmatrix[ 2] = modelmatrix[ 3] = 0;
+		modelmatrix[ 4] = modelmatrix[ 6] = modelmatrix[ 7] = 0;
+		modelmatrix[ 8] = modelmatrix[ 9] = modelmatrix[11] = 0;
+		modelmatrix[12] = modelmatrix[13] = modelmatrix[14] = 0;
+		modelmatrix[0] = modelmatrix[5] = modelmatrix[10] = modelmatrix[15] = 1.0;
+		gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), true, modelmatrix);
 	}
 	else{
-		setmodelmatrix(model_axan);
+		setmodelmatrix_rotate(model_axan);
+		setmodelmatrix_translate();
+		setmodelmatrix_aaaa(modeltranslatematrix, modelrotatematrix);
+		setmodelmatrix_bbbb(modeltranslateinverse, modelrotateinverse);
 		updateui_model(model_axan);
+		gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), true, modelmatrix);
 	}
-	gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "model"), true, modelmatrix);
 }
 
 var camerax = 0.0;
@@ -608,11 +700,11 @@ projinverse = new Float32Array([
 ]);
 function setprojmatrix()
 {
-	var l =-0.001;
-	var r = 0.001;
-	var b =-0.001 * windowheight / windowwidth;
-	var t = 0.001 * windowheight / windowwidth;
-	var n = 0.001;
+	var l =-0.1;
+	var r = 0.1;
+	var b =-0.1 * windowheight / windowwidth;
+	var t = 0.1 * windowheight / windowwidth;
+	var n = 0.1;
 	var f = 1000000.0;
 	//logtoall("%f,%f,%f,%f,%f,%f\n",l,r,b,t,n,f);
 
@@ -933,6 +1025,29 @@ function touchmove(ev)
 	oldx = newx;
 	oldy = newy;
 }
+function model_pos_keydown(ev)
+{
+	if (ev.key === 'Enter') {
+		console.log(ev);
+		ev.preventDefault();
+
+		let text = document.getElementById("model_position_textarea").value;
+		console.log(text);
+		if(text==null)return;
+
+		let arr = text.split(/\s+/);
+		console.log(arr);
+		if(arr.length < 3)return;
+
+		model_tran = arr.slice(0, 3).map(value => parseFloat(value));
+		console.log(model_tran);
+
+		updated_model = 0;
+		updated_camera = 0;
+		updated_local2fb = 0;
+		updated_fb2local = 0;
+	}
+}
 function model_aa_keydown(ev)
 {
 	if (ev.key === 'Enter') {
@@ -949,7 +1064,38 @@ function model_aa_keydown(ev)
 
 		model_axan = arr.slice(0, 4).map(value => parseFloat(value));
 		console.log(model_axan);
+
 		updated_model = 0;
+		updated_camera = 0;
+		updated_local2fb = 0;
+		updated_fb2local = 0;
+	}
+}
+function camera_pos_keydown(ev)
+{
+	if (ev.key === 'Enter') {
+		console.log(ev);
+		ev.preventDefault();
+
+		let text = document.getElementById("camera_position_textarea").value;
+		console.log(text);
+		if(text==null)return;
+
+		let arr = text.split(/\s+/);
+		console.log(arr);
+		if(arr.length < 3)return;
+
+		tmp = arr.slice(0, 3).map(value => parseFloat(value));
+		console.log(tmp);
+
+		camerax = tmp[0];
+		cameray = tmp[1];
+		cameraz = tmp[2];
+
+		updated_model = 0;
+		updated_camera = 0;
+		updated_local2fb = 0;
+		updated_fb2local = 0;
 	}
 }
 function camera_aa_keydown(ev)
@@ -968,19 +1114,83 @@ function camera_aa_keydown(ev)
 
 		camera_axan = arr.slice(0, 4).map(value => parseFloat(value));
 		console.log(camera_axan);
+
 		updated_model = 0;
+		updated_camera = 0;
+		updated_local2fb = 0;
+		updated_fb2local = 0;
+	}
+}
+
+function local_pos_keydown(ev)
+{
+	if (ev.key === 'Enter') {
+		console.log(ev);
+		ev.preventDefault();
+
+		let text = document.getElementById("local_position_textarea").value;
+		console.log(text);
+		if(text==null)return;
+
+		let arr = text.split('\n');
+		console.log(arr);
+		if(arr.length < 4)return;
+
+		localxy = arr.slice(0, 4).map(value => parseFloat(value));
+		console.log(localxy);
+
+		updated_model = 0;
+		updated_camera = 0;
+		updated_local2fb = 0;
+		updated_fb2local = 0;
+	}
+}
+
+function world_pos_keydown(ev)
+{
+	if (ev.key === 'Enter') {
+		console.log(ev);
+		ev.preventDefault();
+
+		let text = document.getElementById("world_position_textarea").value;
+		console.log(text);
+		if(text==null)return;
+
+		let arr = text.split('\n');
+		console.log(arr);
+		if(arr.length < 4)return;
+
+		world = arr.slice(0, 4).map(value => parseFloat(value));
+		console.log(world);
+
+		localxy = [
+		modelinverse[ 0]*world[0] + modelinverse[ 1]*world[1] + modelinverse[ 2]*world[2] + modelinverse[ 3]*world[3],
+		modelinverse[ 4]*world[0] + modelinverse[ 5]*world[1] + modelinverse[ 6]*world[2] + modelinverse[ 7]*world[3],
+		modelinverse[ 8]*world[0] + modelinverse[ 9]*world[1] + modelinverse[10]*world[2] + modelinverse[11]*world[3],
+		modelinverse[12]*world[0] + modelinverse[13]*world[1] + modelinverse[14]*world[2] + modelinverse[15]*world[3]
+		];
+		console.log(localxy);
+
+		updated_model = 0;
+		updated_camera = 0;
+		updated_local2fb = 0;
+		updated_fb2local = 0;
 	}
 }
 
 var updated_model = 0;
 function updateui_model(aa)
 {
-	if(updated_model==1){
-		return;
-	}
+	if(updated_model==1)return;
 	updated_model=1
 
 	let str = '';
+	str += model_tran[0].toFixed(3) + ', ';
+	str += model_tran[1].toFixed(3) + ', ';
+	str += model_tran[2].toFixed(3);
+	document.getElementById('model_position_textarea').value = str;
+
+	str = '';
 	str += aa[0].toFixed(3) + ', ';
 	str += aa[1].toFixed(3) + ', ';
 	str += aa[2].toFixed(3) + ', ';
@@ -998,19 +1208,17 @@ function updateui_model(aa)
 	//
 	str = '';
 	for(let j=0;j<16;j++){
-		if(modelmatrix[j] >= 0)str += ' ';
-		str += modelmatrix[j].toFixed(3);
+		if(modelrotatematrix[j] >= 0)str += ' ';
+		str += modelrotatematrix[j].toFixed(3);
 		str += ((j%4)==3) ? '\n' : ', ';
 	}
-	document.getElementById('model_matrix_textarea').value = str;
+	document.getElementById('model_rotatematrix_textarea').value = str;
 }
 
 var updated_camera = 0;
 function updateui_camera()
 {
-	if(updated_camera==1){
-		return;
-	}
+	if(updated_camera==1)return;
 	updated_camera=1
 
 	let str = '';
@@ -1044,11 +1252,19 @@ function updateui_camera()
 	document.getElementById('camera_matrix_textarea').value = str;
 }
 
+var updated_local2fb = 0;
+var updated_fb2local = 0;
+localxy = new Float32Array([
+	1.0, 1.0, 1.0, 1.0
+]);
 fbxy = new Float32Array([
 	0.0, 0.0, 1.0, 20.0
 ]);
 function updateui_local2fb(){
-	let vec = [1, 1, 1, 1];
+	if(updated_local2fb==1)return;
+	updated_local2fb=1
+
+	let vec = localxy;
 	//let tmp = quaternion_rotatefrom(vec, model_quat);
 	//console.log(tmp);
 
@@ -1173,6 +1389,9 @@ function updateui_local2fb(){
 	document.getElementById('fb_position_textarea').value = str;
 }
 function updateui_fb2local(){
+	if(updated_fb2local==1)return;
+	updated_fb2local=1
+
 	let vpxy = [fbxy[0]/windowwidth, fbxy[1]/windowheight, fbxy[2], fbxy[3]];
 	let ndc = [vpxy[0]*2-1, 1-vpxy[1]*2, vpxy[2], vpxy[3]];
 
